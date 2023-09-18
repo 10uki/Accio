@@ -6,24 +6,54 @@ max_chunks = 10000
 req_confirm = 2
 timeout = 10
 
+
 # command-line arguments
 def validate_arguments(args):
     if len(args) != 4:
         sys.stderr.write("ERROR: Usage - python3 client.py <HOSTNAME-OR-IP> <PORT> <FILENAME>\n")
         sys.exit(1)
 
-    server_host, server_port, file_path = args[1], args[2], args[3]
+    server_host, server_port, filename = args[1], args[2], args[3]
 
     try:
         # A valid range for TCP port numbers (1-65535).
         server_port = int(server_port)
-        if not (1 <= server_port <= 65535):
-            raise ValueError("Invalid port number")
+        if server_port < 1 or server_port > 65535:
+            raise ValueError
     except ValueError:
         sys.stderr.write("ERROR: Invalid port number\n")
         sys.exit(1)
 
-    return server_host, server_port, file_path
+    return server_host, server_port, filename
+
+
+def receive_command(s, command):
+    received_data = b""
+    while not received_data.endswith(command):
+        chunk = s.recv(1)
+        if not chunk:
+            raise RuntimeError("Server disconnected or did not send the expected command")
+        received_data += chunk
+        return received_data
+
+
+def send_file(s, filename):
+    # Open the specified file for reading in binary mode
+    try:
+        with open(filename, 'rb') as file:
+            while True:
+                chunk = file.read(max_chunks)
+                if not chunk:
+                    break
+                total_sent = 0;
+                while total_sent < len(chunk):
+                    sent = s.send(chunk[total_sent:])
+                    if sent == 0:
+                        raise RuntimeError("Socket connection broken")
+                    total_sent += sent
+    except FileNotFoundError:
+        sys.stderr.write("ERROR: File not found\n")
+        sys.exit(1)
 
 
 def establish_connection(server_host, server_port):
@@ -61,29 +91,6 @@ def confirm_accio(s):
             sys.stderr.write("ERROR: Timeout waiting for 'accio' command from server\n")
             s.close()
             sys.exit(1)
-
-
-def send_file(s, file_path):
-    # Open the specified file for reading in binary mode
-    try:
-        with open(file_path, 'rb') as file:
-            chunk = file.read(max_chunks)
-            while chunk:
-                try:
-                    # Send the current chunk of data to the server
-                    s.send(chunk)
-                    # Read the next chunk of data
-                    chunk = file.read(max_chunks)
-                except socket.timeout:
-                    # Handle socket timeout errors and exit with an error message
-                    sys.stderr.write("ERROR: Timeout while sending data to server\n")
-                    s.close()
-                    sys.exit(1)
-    except FileNotFoundError:
-        # Handle the case where the specified file is not found and exit with an error message
-        sys.stderr.write(f"ERROR: File not found - {file_path}\n")
-        s.close()
-        sys.exit(1)
 
 
 def client():
