@@ -4,7 +4,6 @@ import sys
 # Constants
 max_chunks = 10000
 req_confirm = 2
-timeout = 10.0
 
 def receive_command(s, command):
     received_data = b""
@@ -39,7 +38,7 @@ def establish_connection(server_host, server_port):
         # Create a socket object using IPv4 and TCP protocol
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # Set timeout for socket operations
-        s.settimeout(timeout)
+        s.settimeout(10.0)
         try:
             # Attempt to connect to the server using the provided host and port
             s.connect((server_host, server_port))
