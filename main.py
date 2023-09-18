@@ -67,28 +67,5 @@ def main():
     server_port = sys.argv[2]
     filename = sys.argv[3]
 
-    try:
-        # A valid range for TCP port numbers (1-65535).
-        server_port = int(server_port)
-        if not 1 <= server_port <= 65535:
-            raise ValueError
-    except ValueError:
-        sys.stderr.write("ERROR: Invalid port number\n")
-        sys.exit(1)
-
-    s = establish_connection(server_host, server_port)
-
-    receive_command(s, b'accio\r\n')
-
-    s.send(b'confirm-accio\r\n')
-
-    receive_command(s, b'accio\r\n')
-
-    send_file(s, filename)
-    print("File transfer successful")
-
-    s.close()
-    sys.exit(0)
-
 if __name__ == "__main__":
     main()
