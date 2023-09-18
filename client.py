@@ -9,15 +9,11 @@ timeout = 10
 
 def receive_command(s, command):
     received_data = b""
-    start_time = time.time()
     while not received_data.endswith(command):
         chunk = s.recv(1)
         if not chunk:
-            if time.time() - start_time > timeout:
-                raise RuntimeError("Server disconnected.")
-            continue
+            raise RuntimeError("ERROR: Server disconnected.\n")
         received_data += chunk
-        start_time = time.time()
     return received_data
 
 def send_file(s, file_name):
@@ -32,10 +28,10 @@ def send_file(s, file_name):
                 while total_sent < len(chunk):
                     sent = s.send(chunk[total_sent:])
                     if sent == 0:
-                        raise RuntimeError("Socket connection broken")
+                        raise RuntimeError("ERROR: Socket connection broken.\n")
                     total_sent += sent
     except FileNotFoundError:
-        sys.stderr.write("ERROR: File not found\n")
+        sys.stderr.write("ERROR: File not found.\n")
         sys.exit(1)
 
 
@@ -45,7 +41,8 @@ def establish_connection(server_host, server_port):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # Set timeout for socket operations
         s.settimeout(timeout)
-
+        # Record the start time
+        start_time = time.time()
         try:
             # Attempt to connect to the server using the provided host and port
             s.connect((server_host, server_port))
@@ -53,43 +50,38 @@ def establish_connection(server_host, server_port):
             # Handle connection errors and exit with an error message
             sys.stderr.write(f"ERROR: Connection failed - {e}\n")
             sys.exit(1)
+        # Calculate elapsed time.
+        elapsed_time = time.time() - start_time
+        if elapsed_time > timeout:
+            # If the connection took more than 10 seconds, consider it a timeout.
+                raise TimeoutError("ERROR: Connection timed out\n")
         # Return the established socket
         return s
-
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
         sys.exit(1)
-
 
 def client():
     # print(len(sys.argv))
     if len(sys.argv) != 4:
         sys.stderr.write("ERROR: Usage - python3 client.py <HOSTNAME-OR-IP> <PORT> <FILENAME>\n")
         sys.exit(1)
-
     server_host = sys.argv[1]
     server_port = sys.argv[2]
     file_name = sys.argv[3]
-
     try:
         server_port = int(server_port)
         if not (1 <= server_port <= 65535):
-            sys.stderr.write("ERROR: Invalid port number\n")
+            sys.stderr.write("ERROR: Invalid port number.\n")
     except ValueError:
-        sys.stderr.write("ERROR: Port number must be an integer\n")
+        sys.stderr.write("ERROR: Port number must be an integer.\n")
         sys.exit(1)
-
     s = establish_connection(server_host, server_port)
-
     receive_command(s, b'accio\r\n')
-
     s.send(b'confirm-accio\r\n')
-
     receive_command(s, b'accio\r\n')
-
     send_file(s, file_name)
     print("File transfer successful")
-
     s.close()
     sys.exit(0)
 
