@@ -67,7 +67,7 @@ def main():
     server_port = sys.argv[2]
     filename = sys.argv[3]
 
-    return 0
+    # return 0
     #
     # try:
     #     # A valid range for TCP port numbers (1-65535).
