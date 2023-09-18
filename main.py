@@ -59,14 +59,14 @@ def establish_connection(server_host, server_port):
 
 
 def main():
-    print(len(sys.argv))
+    # print(len(sys.argv))
     if len(sys.argv) != 4:
         sys.stderr.write("ERROR: Usage - python3 client.py <HOSTNAME-OR-IP> <PORT> <FILENAME>\n")
         sys.exit(1)
 
     server_host = sys.argv[1]
     server_port = sys.argv[2]
-    filename = sys.argv[3]
+    # filename = sys.argv[3]
 
     try:
         server_port = int(server_port)
