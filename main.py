@@ -58,20 +58,6 @@ def establish_connection(server_host, server_port):
         sys.exit(1)
 
 
-def confirm_accio(s):
-    confirmations = 0
-    while confirmations < req_confirm:
-        try:
-            data = s.recv(1024).decode("utf-8")
-            if data == "accio\r\n":
-                s.send("confirm-accio\r\n".encode())
-                confirmations += 1
-        except socket.timeout:
-            sys.stderr.write("ERROR: Timeout waiting for 'accio' command from server\n")
-            s.close()
-            sys.exit(1)
-
-
 def main():
     if len(sys.argv) != 4:
         sys.stderr.write("ERROR: Usage - python3 client.py <HOSTNAME-OR-IP> <PORT> <FILENAME>\n")
@@ -92,13 +78,17 @@ def main():
 
     s = establish_connection(server_host, server_port)
 
-    receive_command(s, b"accio\r\n")
+    receive_command(s, b'accio\r\n')
+
+    s.send(b'confirm-accio\r\n')
+
+    receive_command(s, b'accio\r\n')
 
     send_file(s, filename)
+    print("File transfer successful")
 
     s.close()
     sys.exit(0)
-
 
 if __name__ == "__main__":
     main()
