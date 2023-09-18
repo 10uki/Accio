@@ -58,7 +58,7 @@ def establish_connection(server_host, server_port):
         sys.exit(1)
 
 
-def main():
+def client():
     # print(len(sys.argv))
     if len(sys.argv) != 4:
         sys.stderr.write("ERROR: Usage - python3 client.py <HOSTNAME-OR-IP> <PORT> <FILENAME>\n")
@@ -91,4 +91,4 @@ def main():
     # sys.exit(0)
 
 if __name__ == '__main__':
-    main()
+    client()
