@@ -7,26 +7,6 @@ req_confirm = 2
 timeout = 10
 
 
-# command-line arguments
-def validate_arguments(args):
-    if len(args) != 4:
-        sys.stderr.write("ERROR: Usage - python3 client.py <HOSTNAME-OR-IP> <PORT> <FILENAME>\n")
-        sys.exit(1)
-
-    server_host, server_port, filename = args[1], args[2], args[3]
-
-    try:
-        # A valid range for TCP port numbers (1-65535).
-        server_port = int(server_port)
-        if server_port < 1 or server_port > 65535:
-            raise ValueError
-    except ValueError:
-        sys.stderr.write("ERROR: Invalid port number\n")
-        sys.exit(1)
-
-    return server_host, server_port, filename
-
-
 def receive_command(s, command):
     received_data = b""
     while not received_data.endswith(command):
@@ -45,7 +25,7 @@ def send_file(s, filename):
                 chunk = file.read(max_chunks)
                 if not chunk:
                     break
-                total_sent = 0;
+                total_sent = 0
                 while total_sent < len(chunk):
                     sent = s.send(chunk[total_sent:])
                     if sent == 0:
@@ -74,7 +54,6 @@ def establish_connection(server_host, server_port):
         return s
 
     except Exception as e:
-        # Handle any other exceptions that might occur and exit with an error message
         sys.stderr.write(f"ERROR: {str(e)}\n")
         sys.exit(1)
 
@@ -93,22 +72,33 @@ def confirm_accio(s):
             sys.exit(1)
 
 
-def client():
-    # Extract the server host, server port, and file path from command-line arguments
-    server_host, server_port, filename = validate_arguments(sys.argv)
-    # Establish a connection to the server
+def main():
+    if len(sys.argv) != 4:
+        sys.stderr.write("ERROR: Usage - python3 client.py <HOSTNAME-OR-IP> <PORT> <FILENAME>\n")
+        sys.exit(1)
+
+    server_host = sys.argv[1]
+    server_port = sys.argv[2]
+    filename = sys.argv[3]
+
+    try:
+        # A valid range for TCP port numbers (1-65535).
+        server_port = int(server_port)
+        if not 1 <= server_port <= 65535:
+            raise ValueError
+    except ValueError:
+        sys.stderr.write("ERROR: Invalid port number\n")
+        sys.exit(1)
+
     s = establish_connection(server_host, server_port)
 
-    # Receive the "accio" command from the server
     receive_command(s, b"accio\r\n")
 
-    # Send the file to the server
     send_file(s, filename)
 
-    # Close the socket connection and exit the program with a success code
     s.close()
     sys.exit(0)
 
 
 if __name__ == "__main__":
-    client()
+    main()
