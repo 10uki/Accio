@@ -6,7 +6,6 @@ max_chunks = 10000
 req_confirm = 2
 timeout = 10
 
-
 def receive_command(s, command):
     received_data = b""
     while not received_data.endswith(command):
@@ -16,11 +15,10 @@ def receive_command(s, command):
         received_data += chunk
     return received_data
 
-
-def send_file(s, filename):
+def send_file(s, file_name):
     # Open the specified file for reading in binary mode
     try:
-        with open(filename, 'rb') as file:
+        with open(file_name, 'rb') as file:
             while True:
                 chunk = file.read(max_chunks)
                 if not chunk:
@@ -66,7 +64,7 @@ def client():
 
     server_host = sys.argv[1]
     server_port = sys.argv[2]
-    # filename = sys.argv[3]
+    file_name = sys.argv[3]
 
     try:
         server_port = int(server_port)
@@ -78,17 +76,17 @@ def client():
 
     s = establish_connection(server_host, server_port)
 
-    # receive_command(s, b'accio\r\n')
-    #
-    # s.send(b'confirm-accio\r\n')
-    #
-    # receive_command(s, b'accio\r\n')
-    #
-    # send_file(s, filename)
-    # print("File transfer successful")
-    #
-    # s.close()
-    # sys.exit(0)
+    receive_command(s, b'accio\r\n')
+
+    s.send(b'confirm-accio\r\n')
+
+    receive_command(s, b'accio\r\n')
+
+    send_file(s, file_name)
+    print("File transfer successful")
+
+    s.close()
+    sys.exit(0)
 
 if __name__ == '__main__':
     client()
