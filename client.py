@@ -1,11 +1,10 @@
-import sys
 import socket
-import time
+import sys
 
 # Constants
 max_chunks = 10000
 req_confirm = 2
-timeout = 10
+timeout = 10.0
 
 def receive_command(s, command):
     received_data = b""
@@ -41,21 +40,12 @@ def establish_connection(server_host, server_port):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # Set timeout for socket operations
         s.settimeout(timeout)
-        # Record the start time
-        start_time = time.time()
         try:
             # Attempt to connect to the server using the provided host and port
             s.connect((server_host, server_port))
         except socket.error as e:
             # Handle connection errors and exit with an error message
             sys.stderr.write("ERROR: Connection failed.\n")
-            sys.exit(1)
-        # Calculate elapsed time.
-        elapsed_time = time.time() - start_time
-        if elapsed_time > timeout:
-            # If the connection took more than 10 seconds, consider it a timeout.
-            s.close()
-            sys.stderr.write("ERROR: Connection timed out.\n")
             sys.exit(1)
         # Return the established socket
         return s
@@ -79,14 +69,17 @@ def client():
         sys.stderr.write("ERROR: Port number must be an integer.\n")
         sys.exit(1)
     s = establish_connection(server_host, server_port)
+
     receive_command(s, b'accio\r\n')
     s.send(b'confirm-accio\r\n')
     receive_command(s, b'accio\r\n')
     s.send(b'confirm-accio-again\r\n\r\n')
     send_file(s, file_name)
     print("File transfer successful")
+
     s.close()
     sys.exit(0)
+
 
 if __name__ == '__main__':
     client()
