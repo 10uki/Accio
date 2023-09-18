@@ -1,5 +1,6 @@
 import sys
 import socket
+import time
 
 # Constants
 max_chunks = 10000
@@ -8,11 +9,15 @@ timeout = 10
 
 def receive_command(s, command):
     received_data = b""
+    start_time = time.time()
     while not received_data.endswith(command):
         chunk = s.recv(1)
         if not chunk:
-            raise RuntimeError("Server disconnected or did not send the expected command")
+            if time.time() - start_time > timeout:
+                raise RuntimeError("Server disconnected.")
+            continue
         received_data += chunk
+        start_time = time.time()
     return received_data
 
 def send_file(s, file_name):
