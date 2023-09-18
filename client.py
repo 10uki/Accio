@@ -48,13 +48,15 @@ def establish_connection(server_host, server_port):
             s.connect((server_host, server_port))
         except socket.error as e:
             # Handle connection errors and exit with an error message
-            sys.stderr.write(f"ERROR: Connection failed - {e}\n")
+            sys.stderr.write("ERROR: Connection failed.\n")
             sys.exit(1)
         # Calculate elapsed time.
         elapsed_time = time.time() - start_time
         if elapsed_time > timeout:
             # If the connection took more than 10 seconds, consider it a timeout.
-                raise TimeoutError("ERROR: Connection timed out\n")
+            s.close()
+            sys.stderr.write("ERROR: Connection timed out.\n")
+            sys.exit(1)
         # Return the established socket
         return s
     except Exception as e:
