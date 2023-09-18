@@ -95,7 +95,7 @@ def confirm_accio(s):
 
 def client():
     # Extract the server host, server port, and file path from command-line arguments
-    server_host, server_port, file_path = validate_arguments(sys.argv)
+    server_host, server_port, filename = validate_arguments(sys.argv)
     # Establish a connection to the server
     s = establish_connection(server_host, server_port)
 
@@ -103,7 +103,7 @@ def client():
     receive_command(s, b"accio\r\n")
 
     # Send the file to the server
-    send_file(s, file_path)
+    send_file(s, filename)
 
     # Close the socket connection and exit the program with a success code
     s.close()
