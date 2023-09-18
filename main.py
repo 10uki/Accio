@@ -34,7 +34,7 @@ def receive_command(s, command):
         if not chunk:
             raise RuntimeError("Server disconnected or did not send the expected command")
         received_data += chunk
-        return received_data
+    return received_data
 
 
 def send_file(s, filename):
@@ -98,10 +98,13 @@ def client():
     server_host, server_port, file_path = validate_arguments(sys.argv)
     # Establish a connection to the server
     s = establish_connection(server_host, server_port)
-    # Confirm that the server is ready to receive data
-    confirm_accio(s)
+
+    # Receive the "accio" command from the server
+    receive_command(s, b"accio\r\n")
+
     # Send the file to the server
     send_file(s, file_path)
+
     # Close the socket connection and exit the program with a success code
     s.close()
     sys.exit(0)
