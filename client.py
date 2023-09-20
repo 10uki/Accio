@@ -4,14 +4,19 @@ import sys
 # Constants
 max_chunks = 10000
 req_confirm = 2
+timeout = 10
 
 def receive_command(s, command):
     received_data = b""
-    while not received_data.endswith(command):
-        chunk = s.recv(1)
-        if not chunk:
-            raise RuntimeError("ERROR: Server disconnected.\n")
-        received_data += chunk
+    s.settimeout(timeout)
+    try:
+        while not received_data.endswith(command):
+            chunk = s.recv(1)
+            if not chunk:
+                raise RuntimeError("ERROR: Server disconnected.\n")
+            received_data += chunk
+    except socket.timeout:
+        raise RuntimeError("ERROR: Server disconnected for more than 10 seconds.\n")
     return received_data
 
 def send_file(s, file_name):
@@ -31,7 +36,6 @@ def send_file(s, file_name):
     except FileNotFoundError:
         sys.stderr.write("ERROR: File not found.\n")
         sys.exit(1)
-
 
 def establish_connection(server_host, server_port):
     try:
