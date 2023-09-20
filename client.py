@@ -13,10 +13,10 @@ def receive_command(s, command):
         while not received_data.endswith(command):
             chunk = s.recv(1)
             if not chunk:
-                raise RuntimeError("ERROR: Server disconnected.\n")
+                sys.stderr.write ("ERROR: Server disconnected.\n")
             received_data += chunk
     except socket.timeout:
-        raise RuntimeError("ERROR: Server disconnected for more than 10 seconds.\n")
+        sys.stderr.write ("ERROR: Server disconnected for more than 10 seconds.\n")
     return received_data
 
 def send_file(s, file_name):
@@ -82,7 +82,6 @@ def client():
 
     s.close()
     sys.exit(0)
-
 
 if __name__ == '__main__':
     client()
