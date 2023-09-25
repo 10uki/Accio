@@ -7,6 +7,7 @@ import sys
 HOST = "0.0.0.0" # Standard loopback interface address (localhost)
 not_stopped = True
 
+
 def handler (signum,frame):
     not_stopped = False
 
