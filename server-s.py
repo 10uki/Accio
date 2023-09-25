@@ -40,9 +40,9 @@ def main():
         s.listen(10)
 
         while not_stopped:
-            conn, addr = s.accept()
-            with conn:
-                try:
+            try:
+                conn, addr = s.accept()
+                with conn:
                     conn.send(b'accio\r\n')
                     data = conn.recv(1024)  # Receive data in chunks
                     total_bytes_received = len(data)
@@ -50,10 +50,9 @@ def main():
                     while data:
                         data = conn.recv(1024)
                         total_bytes_received += len(data)
-
                     print("Bytes Received:", total_bytes_received)
-                except socket.timeout:
-                    sys.stderr.write("ERROR: Connection Timeout\n")
+            except socket.timeout:
+                sys.stderr.write("ERROR: Connection Timeout\n")
 
     s.close()
     sys.exit()
