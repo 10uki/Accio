@@ -3,11 +3,14 @@
 import socket
 import signal
 import sys
+import time
 
 HOST = "0.0.0.0" # Standard loopback interface address (localhost)
 not_stopped = True
 
 def handler (signum,frame):
+    not_stopped = False
+    time.sleep(15)
     s.close()
     sys.exit(0)
 
@@ -17,6 +20,7 @@ def main():
         sys.exit(1)
 
     server_port = sys.argv[1]
+
     try:
         # A valid range for TCP port numbers (1-65535).
         server_port = int(server_port)
@@ -50,8 +54,9 @@ def main():
                     print("Bytes Received:", total_bytes_received)
                 except socket.timeout:
                     sys.stderr.write("ERROR: Connection Timeout\n")
-                except Exception as e:
-                    sys.stderr.write(f"ERROR: {str(e)}\n")
+
+    s.close()
+    sys.exit()
 
 if __name__ == "__main__":
     main()
