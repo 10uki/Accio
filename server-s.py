@@ -3,16 +3,12 @@
 import socket
 import signal
 import sys
-import time
 
 HOST = "0.0.0.0" # Standard loopback interface address (localhost)
 not_stopped = True
 
 def handler (signum,frame):
     not_stopped = False
-   # time.sleep(15)
- #   s.close()
-  #  sys.exit(0)
 
 def main():
     if len(sys.argv) != 2:
@@ -30,7 +26,7 @@ def main():
         sys.stderr.write("ERROR: Invalid port number\n")
         sys.exit(1)
 
-    signal.signal(signal.SIGQUIT, handler)
+ #  signal.signal(signal.SIGQUIT, handler)
     signal.signal(signal.SIGTERM, handler)
     signal.signal(signal.SIGINT, handler)
     socket.setdefaulttimeout(10)
@@ -51,7 +47,7 @@ def main():
                     data = conn.recv(1024)
                     total_bytes_received += len(data)
 
-                print("Bytes Received:", total_bytes_received)
+                print(total_bytes_received)
         except socket.timeout:
             sys.stderr.write("ERROR: Connection Timeout\n")
 
