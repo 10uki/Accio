@@ -39,20 +39,21 @@ def main():
         s.bind((HOST, server_port ))
         s.listen(10)
 
-        while not_stopped:
-            try:
-                conn, addr = s.accept()
-                with conn:
-                    conn.send(b'accio\r\n')
+        try:
+            conn, addr = s.accept()
+            conn.send(b'accio\r\n')
+            with conn:
+                while not_stopped:
                     data = conn.recv(1024)  # Receive data in chunks
                     total_bytes_received = len(data)
 
-                    while data:
-                        data = conn.recv(1024)
-                        total_bytes_received += len(data)
-                    print("Bytes Received:", total_bytes_received)
-            except socket.timeout:
-                sys.stderr.write("ERROR: Connection Timeout\n")
+                while data:
+                    data = conn.recv(1024)
+                    total_bytes_received += len(data)
+
+                print("Bytes Received:", total_bytes_received)
+        except socket.timeout:
+            sys.stderr.write("ERROR: Connection Timeout\n")
 
     s.close()
     sys.exit()
