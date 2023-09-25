@@ -12,6 +12,7 @@ def handler(signum, frame):
     sys.exit()
 
 def main():
+    global NOT_STOPPED
     if len(sys.argv) != 2:
         sys.stderr.write("ERROR: Usage - python3 server-s.py  <PORT> \n")
         sys.exit(1)
@@ -31,6 +32,7 @@ def main():
     # signal.signal(signal.SIGTERM, handler)
     signal.signal(signal.SIGINT, handler)
 
+    # TODO: CHANGE TIMEOUT TO 45
     socket.setdefaulttimeout(10)
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -38,17 +40,19 @@ def main():
         s.listen(10)
         try:
             conn, addr = s.accept()
+            print(f"Connection from {addr} has been established.")
             conn.send(b'accio\r\n')
             with conn:
+                total_bytes_received = 0
+
                 while NOT_STOPPED:
                     data = conn.recv(1024)  # Receive data in chunks
-                    total_bytes_received = len(data)
-
                     while data:
-                        data = conn.recv(1024)
                         total_bytes_received += len(data)
 
-                    print("Bytes Received:", total_bytes_received)
+                    if total_bytes_received > 0:
+                        print("Bytes Received:", total_bytes_received)
+
         except socket.timeout:
             sys.stderr.write("ERROR: Connection Timeout\n")
 

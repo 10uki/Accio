@@ -36,6 +36,8 @@ def send_file(s, file_name):
     except FileNotFoundError:
         sys.stderr.write("ERROR: File not found.\n")
         sys.exit(1)
+    # s.sendall(b'Hello, world')
+
 
 def establish_connection(server_host, server_port):
     try:
@@ -82,7 +84,6 @@ def client():
 
     s.close()
     sys.exit(0)
-
 
 if __name__ == '__main__':
     client()
