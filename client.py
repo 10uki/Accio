@@ -77,7 +77,6 @@ def client():
 
     receive_command(s, b'accio\r\n')
     s.send(b'confirm-accio\r\n')
-    receive_command(s, b'accio\r\n')
     s.send(b'confirm-accio-again\r\n\r\n')
     send_file(s, file_name)
     print("File transfer successful")
