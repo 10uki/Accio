@@ -4,7 +4,7 @@ import sys
 
 socket.setdefaulttimeout(10)
 
-HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
+HOST = "0.0.0.0"  # Standard loopback interface address (localhost)
 RUNNING = True
 
 def handler(signum, frame):
@@ -44,15 +44,16 @@ def main():
                 total_bytes_received = 0
 
                 with conn:
-                    file = open('input_file.bin', 'wb')
+                    # file = open('input_file.bin', 'wb')
                     while True:
                         data = conn.recv(1024)
                         if not data:
                             break
                         total_bytes_received += len(data)
-                    file.write(data)
+                    # file.write(data)
                     # Print the total bytes received
-                    print(total_bytes_received)
+                    print(data.decode('utf-8'))
+                print(total_bytes_received)
 
             except socket.timeout:
                 sys.stderr.write("ERROR: Connection Timeout\n")
