@@ -10,7 +10,6 @@ RUNNING = True
 def handler(signum, frame):
     global RUNNING
     RUNNING = False
-    sys.exit()
 
 def main():
     global RUNNING
