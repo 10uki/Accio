@@ -10,6 +10,7 @@ RUNNING = True
 def handler(signum, frame):
     global RUNNING
     RUNNING = False
+    sys.exit()
 
 def handle_client(conn, addr):
     try:
@@ -67,6 +68,9 @@ def main():
                     sys.stderr.write("ERROR: Connection Timeout.\n")
         except OSError as e:
             sys.stderr.write(f"ERROR: {str(e)}\n")
+
+    s.close()
+    sys.exit()
 
 if __name__ == "__main__":
     main()
