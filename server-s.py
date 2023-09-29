@@ -10,6 +10,7 @@ RUNNING = True
 def handler(signum, frame):
     global RUNNING
     RUNNING = False
+    sys.exit()
 
 def main():
     global RUNNING
@@ -43,12 +44,13 @@ def main():
                 total_bytes_received = 0
 
                 with conn:
-                    while RUNNING:
+                    while True:
                         data = conn.recv(1024)
                         if not data:
                             break
                         total_bytes_received += len(data)
                     print(str(total_bytes_received))
+                    total_bytes_received += len(data)
             except socket.timeout:
                 sys.stderr.write("ERROR: Connection Timeout\n")
             except OSError as e:
