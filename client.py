@@ -2,13 +2,11 @@ import socket
 import sys
 
 # Constants
-max_chunks = 10000
-req_confirm = 2
-timeout = 10
+MAX_CHUNKS = 10000
 
 def receive_command(s, command):
     received_data = b""
-    s.settimeout(timeout)
+    s.settimeout(10.0)
     try:
         while not received_data.endswith(command):
             chunk = s.recv(1)
@@ -24,7 +22,7 @@ def send_file(s, FILE):
     try:
         with open(FILE, 'rb') as file:
             while True:
-                chunk = file.read(max_chunks)
+                chunk = file.read(MAX_CHUNKS)
                 if not chunk:
                     break
                 total_sent = 0
@@ -57,16 +55,18 @@ def establish_connection(HOST, PORT):
         sys.exit(1)
 
 def client():
-    # print(len(sys.argv))
+
     if len(sys.argv) != 4:
         sys.stderr.write("ERROR: Usage - python3 client.py <HOSTNAME-OR-IP> <PORT> <FILENAME>\n")
         sys.exit(1)
+
     HOST = sys.argv[1]
     PORT = sys.argv[2]
     FILE = sys.argv[3]
+
     try:
         PORT = int(PORT)
-        if not (1 <= PORT <= 65535):
+        if not (1 <= PORT<= 65535):
             sys.stderr.write("ERROR: Invalid port number.\n")
     except ValueError:
         sys.stderr.write("ERROR: Port number must be an integer.\n")
@@ -82,7 +82,6 @@ def client():
 
     s.close()
     sys.exit(0)
-
 
 if __name__ == '__main__':
     client()

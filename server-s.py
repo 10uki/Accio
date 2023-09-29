@@ -23,6 +23,7 @@ def handle_client(conn, addr):
             if not data:
                 break
             conn.send(data)
+
             total_bytes_received += len(data)
 
         print(total_bytes_received)
