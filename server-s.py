@@ -44,7 +44,7 @@ def main():
                 total_bytes_received = 0
 
                 with conn:
-                    while True:
+                    while RUNNING:
                         data = conn.recv(1024)
                         if not data:
                             break
