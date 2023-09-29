@@ -38,7 +38,6 @@ def send_file(s, file_name):
         sys.exit(1)
     # s.sendall(b'Hello, world')
 
-
 def establish_connection(server_host, server_port):
     try:
         # Create a socket object using IPv4 and TCP protocol

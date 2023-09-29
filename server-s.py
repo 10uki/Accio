@@ -1,18 +1,20 @@
 import socket
 import signal
 import sys
-import time
+
+socket.setdefaulttimeout(10)
 
 HOST = "0.0.0.0"  # Standard loopback interface address (localhost)
-NOT_STOPPED = True
+PORT = 0
+RUNNING = True
 
 def handler(signum, frame):
-    global NOT_STOPPED
-    NOT_STOPPED = False
+    global RUNNING
+    RUNNING = False
     sys.exit()
 
 def main():
-    global NOT_STOPPED
+    global RUNNING
     if len(sys.argv) != 2:
         sys.stderr.write("ERROR: Usage - python3 server-s.py  <PORT> \n")
         sys.exit(1)
@@ -32,26 +34,25 @@ def main():
     # signal.signal(signal.SIGTERM, handler)
     signal.signal(signal.SIGINT, handler)
 
-    # TODO: CHANGE TIMEOUT TO 45
-    socket.setdefaulttimeout(10)
-
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind((HOST, server_port))
-        s.listen(10)
         try:
-            conn, addr = s.accept()
-            print(f"Connection from {addr} has been established.")
-            conn.send(b'accio\r\n')
-            with conn:
+            s.bind((HOST, PORT))
+            s.listen(10)
+            while RUNNING:
+                conn, addr = s.accept()
+                print(f"Connected by {addr}")
+                print("Sending accio")
+                conn.send(b'accio\r\n')
                 total_bytes_received = 0
 
-                while NOT_STOPPED:
-                    data = conn.recv(1024)  # Receive data in chunks
-                    while data:
+                with conn:
+                    while True:
+                        data = conn.recv(1024)
+                        if not data:
+                            break
                         total_bytes_received += len(data)
-
-                    if total_bytes_received > 0:
-                        print("Bytes Received:", total_bytes_received)
+                        # print("Temp bytes: " + str(total_bytes_received))
+                    print("Total bytes: " + str(total_bytes_received))
 
         except socket.timeout:
             sys.stderr.write("ERROR: Connection Timeout\n")
