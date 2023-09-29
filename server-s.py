@@ -4,7 +4,7 @@ import sys
 
 socket.setdefaulttimeout(10)
 
-HOST = "0.0.0.0"  # Standard loopback interface address (localhost)
+HOST = "127.0.0.1" # Standard loopback interface address (localhost)
 RUNNING = True
 
 def handler(signum, frame):
@@ -40,7 +40,7 @@ def main():
         sys.stderr.write("ERROR: Usage - python3 server-s.py <PORT>\n")
         sys.exit(1)
 
-    PORT = sys.argv[1]
+    PORT = int(sys.argv[1])
 
     try:
         # A valid range for TCP port numbers (1-65535).
