@@ -23,7 +23,6 @@ def handle_client(conn, addr):
             if not data:
                 break
             total_bytes_received += len(data)
-            data.decode('utf-8')
     print(total_bytes_received)
 
 def main():
