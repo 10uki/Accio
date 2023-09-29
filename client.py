@@ -62,17 +62,17 @@ def client():
     if len(sys.argv) != 4:
         sys.stderr.write("ERROR: Usage - python3 client.py <HOSTNAME-OR-IP> <PORT> <FILENAME>\n")
         sys.exit(1)
-    server_host = sys.argv[1]
-    server_port = sys.argv[2]
+    HOST = sys.argv[1]
+    PORT = sys.argv[2]
     file_name = sys.argv[3]
     try:
-        server_port = int(server_port)
-        if not (1 <= server_port <= 65535):
+        PORT = int(PORT)
+        if not (1 <= PORT <= 65535):
             sys.stderr.write("ERROR: Invalid port number.\n")
     except ValueError:
         sys.stderr.write("ERROR: Port number must be an integer.\n")
         sys.exit(1)
-    s = establish_connection(server_host, server_port)
+    s = establish_connection(HOST, PORT)
 
     receive_command(s, b'accio\r\n')
     s.send(b'confirm-accio\r\n')
