@@ -49,14 +49,14 @@ def main():
                         if not data:
                             break
                         total_bytes_received += len(data)
-                    print(str(total_bytes_received))
-                    total_bytes_received += len(data)
+
+                    # Print the total bytes received
+                    print(total_bytes_received)
+
             except socket.timeout:
                 sys.stderr.write("ERROR: Connection Timeout\n")
             except OSError as e:
                 sys.stderr.write(f"ERROR: {e}\n")
-
-    sys.exit()
 
 if __name__ == "__main__":
     main()
