@@ -34,31 +34,28 @@ def main():
     signal.signal(signal.SIGINT, handler)
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind((HOST, PORT))
-        s.listen(10)
+        try:
+            s.bind((HOST, PORT))
+            s.listen(10)
 
-        while RUNNING: #previously running
-            try:
+            while RUNNING:  # previously running
                 conn, addr = s.accept()
                 conn.send(b'accio\r\n')
                 total_bytes_received = 0
 
                 with conn:
-                    # file = open('input_file.bin', 'wb')
                     while True:
                         data = conn.recv(1024)
                         if not data:
                             break
                         total_bytes_received += len(data)
-                    # file.write(data)
-                    # Print the total bytes received
                     print(data.decode('utf-8'))
-                print(total_bytes_received)
+                    print(total_bytes_received)
 
-            except socket.timeout:
-                sys.stderr.write("ERROR: Connection Timeout\n")
-            except OSError as e:
-                sys.stderr.write(f"ERROR: {e}\n")
+        except socket.timeout:
+            sys.stderr.write("ERROR: Connection Timeout.")
+        except OSError as e:
+            sys.stderr.write(f"ERROR: {e}\n")
 
 if __name__ == "__main__":
     main()
