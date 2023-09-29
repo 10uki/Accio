@@ -35,10 +35,11 @@ def main():
     signal.signal(signal.SIGINT, handler)
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        try:
-            s.bind((HOST, PORT))
-            s.listen(10)
-            while RUNNING:
+        s.bind((HOST, PORT))
+        s.listen(10)
+
+        while RUNNING:
+            try:
                 conn, addr = s.accept()
                 conn.send(b'accio\r\n')
                 total_bytes_received = 0
@@ -49,13 +50,11 @@ def main():
                         if not data:
                             break
                         total_bytes_received += len(data)
-                        # print("Temp bytes: " + str(total_bytes_received))
                     print(total_bytes_received)
 
-        except socket.timeout:
-            sys.stderr.write("ERROR: Connection Timeout\n")
+            except socket.timeout:
+                sys.stderr.write("ERROR: Connection Timeout\n")
 
-    s.close()
     sys.exit()
 
 if __name__ == "__main__":
