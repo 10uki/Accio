@@ -1,6 +1,7 @@
 import socket
 import signal
 import sys
+import threading
 
 socket.setdefaulttimeout(10)
 
@@ -11,6 +12,18 @@ def handler(signum, frame):
     global RUNNING
     RUNNING = False
     sys.exit()
+
+def handle_client(conn, addr):
+    conn.send(b'accio\r\n')
+    total_bytes_received = 0
+
+    with conn:
+        while True:
+            data = conn.recv(1024)
+            if not data:
+                break
+            total_bytes_received += len(data)
+        print(total_bytes_received)
 
 def main():
     global RUNNING
@@ -40,17 +53,9 @@ def main():
 
             while RUNNING:  # previously running
                 conn, addr = s.accept()
-                conn.send(b'accio\r\n')
-                total_bytes_received = 0
-
-                with conn:
-                    while True:
-                        data = conn.recv(1024)
-                        if not data:
-                            break
-                        total_bytes_received += len(data)
-                    print(data.decode('utf-8'))
-                    print(total_bytes_received)
+                # Create a new thread to handle each client
+                client_thread = threading.Thread(target=handle_client, args=(conn, addr))
+                client_thread.start()
 
         except socket.timeout:
             sys.stderr.write("ERROR: Connection Timeout.")
