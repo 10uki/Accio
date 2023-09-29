@@ -34,6 +34,9 @@ def main():
     signal.signal(signal.SIGINT, handler)
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind((HOST, PORT))
+        s.listen(10)
+
         while RUNNING:
             try:
                 conn, addr = s.accept()
@@ -52,7 +55,6 @@ def main():
             except OSError as e:
                 sys.stderr.write(f"ERROR: {e}\n")
 
-    s.close()
     sys.exit()
 
 if __name__ == "__main__":
