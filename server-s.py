@@ -5,7 +5,6 @@ import sys
 socket.setdefaulttimeout(10)
 
 HOST = "0.0.0.0"  # Standard loopback interface address (localhost)
-PORT = 0
 RUNNING = True
 
 def handler(signum, frame):
@@ -16,15 +15,15 @@ def handler(signum, frame):
 def main():
     global RUNNING
     if len(sys.argv) != 2:
-        sys.stderr.write("ERROR: Usage - python3 server-s.py  <PORT> \n")
+        sys.stderr.write("ERROR: Usage - python3 server-s.py <PORT>\n")
         sys.exit(1)
 
-    server_port = sys.argv[1]
+    PORT = sys.argv[1]
 
     try:
         # A valid range for TCP port numbers (1-65535).
-        server_port = int(server_port)
-        if not 1 <= server_port <= 65535:
+        PORT = int(PORT)
+        if not 1 <= PORT <= 65535:
             raise ValueError
     except ValueError:
         sys.stderr.write("ERROR: Invalid port number\n")
