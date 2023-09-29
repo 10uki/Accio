@@ -1,6 +1,7 @@
 import socket
 import signal
 import sys
+import threading
 
 socket.setdefaulttimeout(10)
 
@@ -58,10 +59,10 @@ def main():
             s.bind((HOST, PORT))
             s.listen(10)
 
-            while RUNNING:
+            while True:
                 try:
                     conn, addr = s.accept()
-                    handle_client(conn, addr)
+                    threading.Thread(target=handle_client, args=(conn, addr)).start()
                 except socket.timeout:
                     sys.stderr.write("ERROR: Connection Timeout.\n")
         except OSError as e:
