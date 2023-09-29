@@ -17,23 +17,20 @@ def handle_client(conn, addr):
         conn.send(b'accio\r\n')
         total_bytes_received = 0
 
-        while True:
-            data = conn.recv(1024)
-            if not data:
-                break
-            conn.send(data)
-            total_bytes_received += len(data)
-
-        print(total_bytes_received)
+        with conn:
+            while True:
+                data = conn.recv(1024)
+                if not data:
+                    break
+                conn.send(data)
+                total_bytes_received += len(data)
+            print(total_bytes_received)
 
     except socket.timeout:
         sys.stderr.write("ERROR: Connection Timeout.\n")
 
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
-
-    finally:
-        conn.close()
 
 def main():
     global RUNNING
