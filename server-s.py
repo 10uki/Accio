@@ -1,4 +1,3 @@
-
 import socket
 import signal
 import sys
@@ -23,7 +22,6 @@ def handle_client(conn, addr):
             if not data:
                 break
             conn.send(data)
-
             total_bytes_received += len(data)
 
         print(total_bytes_received)
@@ -43,7 +41,7 @@ def main():
         sys.stderr.write("ERROR: Usage - python3 server-s.py <PORT>\n")
         sys.exit(1)
 
-    PORT = int(sys.argv[1])
+    PORT = sys.argv[1]
 
     try:
         # A valid range for TCP port numbers (1-65535).
@@ -54,8 +52,8 @@ def main():
         sys.stderr.write("ERROR: Invalid port number.\n")
         sys.exit(1)
 
-    # signal.signal(signal.SIGQUIT, handler)
-    # signal.signal(signal.SIGTERM, handler)
+    signal.signal(signal.SIGQUIT, handler)
+    signal.signal(signal.SIGTERM, handler)
     signal.signal(signal.SIGINT, handler)
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:

@@ -3,10 +3,11 @@ import sys
 
 # Constants
 MAX_CHUNKS = 10000
+TIMEOUT = 10.0
 
 def receive_command(s, command):
     received_data = b""
-    s.settimeout(10.0)
+    s.settimeout(TIMEOUT)
     try:
         while not received_data.endswith(command):
             chunk = s.recv(1)
@@ -40,7 +41,7 @@ def establish_connection(HOST, PORT):
         # Create a socket object using IPv4 and TCP protocol
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # Set timeout for socket operations
-        s.settimeout(10.0)
+        s.settimeout(TIMEOUT)
         try:
             # Attempt to connect to the server using the provided host and port
             s.connect((HOST, PORT))
@@ -68,9 +69,11 @@ def client():
         PORT = int(PORT)
         if not (1 <= PORT<= 65535):
             sys.stderr.write("ERROR: Invalid port number.\n")
+            sys.exit(1)
     except ValueError:
         sys.stderr.write("ERROR: Port number must be an integer.\n")
         sys.exit(1)
+
     s = establish_connection(HOST, PORT)
 
     receive_command(s, b'accio\r\n')
