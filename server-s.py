@@ -40,8 +40,6 @@ def main():
             s.listen(10)
             while RUNNING:
                 conn, addr = s.accept()
-                print(f"Connected by {addr}")
-                print("Sending accio")
                 conn.send(b'accio\r\n')
                 total_bytes_received = 0
 
@@ -52,7 +50,7 @@ def main():
                             break
                         total_bytes_received += len(data)
                         # print("Temp bytes: " + str(total_bytes_received))
-                    print("Total bytes: " + str(total_bytes_received))
+                    print(total_bytes_received)
 
         except socket.timeout:
             sys.stderr.write("ERROR: Connection Timeout\n")
