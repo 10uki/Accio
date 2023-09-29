@@ -38,7 +38,7 @@ def send_file(s, file_name):
         sys.exit(1)
     # s.sendall(b'Hello, world')
 
-def establish_connection(server_host, server_port):
+def establish_connection(HOST, PORT):
     try:
         # Create a socket object using IPv4 and TCP protocol
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -46,7 +46,7 @@ def establish_connection(server_host, server_port):
         s.settimeout(10.0)
         try:
             # Attempt to connect to the server using the provided host and port
-            s.connect((server_host, server_port))
+            s.connect((HOST, PORT))
         except socket.error as e:
             # Handle connection errors and exit with an error message
             sys.stderr.write("ERROR: Connection failed.\n")
