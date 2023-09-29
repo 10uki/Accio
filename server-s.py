@@ -13,7 +13,7 @@ def handler(signum, frame):
     RUNNING = False
     sys.exit()
 
-def handle_client(conn, addr):
+def handle_client(conn):
     conn.send(b'accio\r\n')
     total_bytes_received = 0
 
@@ -23,7 +23,7 @@ def handle_client(conn, addr):
             if not data:
                 break
             total_bytes_received += len(data)
-        print(total_bytes_received)
+    print(total_bytes_received)
 
 def main():
     global RUNNING
