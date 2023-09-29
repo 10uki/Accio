@@ -37,8 +37,6 @@ def main():
         while RUNNING:
             try:
                 conn, addr = s.accept()
-                print(f"Connected by {addr}")
-                print("Sending accio")
                 conn.send(b'accio\r\n')
                 total_bytes_received = 0
 
