@@ -13,6 +13,22 @@ def handler(signum, frame):
     RUNNING = False
     sys.exit()
 
+def handle_client(conn, addr):
+    try:
+        conn.send(b'accio\r\n')
+        total_bytes_received = 0
+
+        while True:
+            data = conn.recv(1024)
+            if not data:
+                break
+            total_bytes_received += len(data)
+
+    except socket.timeout:
+        sys.stderr.write("ERROR: Connection Timeout.\n")
+
+    conn.close()
+
 def main():
     global RUNNING
     if len(sys.argv) != 2:
@@ -27,7 +43,7 @@ def main():
         if not 1 <= PORT <= 65535:
             raise ValueError
     except ValueError:
-        sys.stderr.write("ERROR: Invalid port number\n")
+        sys.stderr.write("ERROR: Invalid port number.\n")
         sys.exit(1)
 
     # signal.signal(signal.SIGQUIT, handler)
@@ -41,21 +57,11 @@ def main():
         while RUNNING:
             try:
                 conn, addr = s.accept()
-                conn.send(b'accio\r\n')
-                total_bytes_received = 0
-
-                with conn:
-                    while True:
-                        data = conn.recv(1024)
-                        if not data:
-                            break
-                        total_bytes_received += len(data)
-                    print(total_bytes_received)
-
+                handle_client(conn, addr)
             except socket.timeout:
-                sys.stderr.write("ERROR: Connection Timeout\n")
+                sys.stderr.write("ERROR: Connection Timeout.\n")
 
-    sys.exit()
+        sys.exit()
 
 if __name__ == "__main__":
     main()
