@@ -34,10 +34,8 @@ def main():
     signal.signal(signal.SIGINT, handler)
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        try:
-            s.bind((HOST, PORT))
-            s.listen(10)
-            while RUNNING:
+        while RUNNING:
+            try:
                 conn, addr = s.accept()
                 print(f"Connected by {addr}")
                 print("Sending accio")
@@ -50,11 +48,11 @@ def main():
                         if not data:
                             break
                         total_bytes_received += len(data)
-                        # print("Temp bytes: " + str(total_bytes_received))
-                    print("Total bytes: " + str(total_bytes_received))
-
-        except socket.timeout:
-            sys.stderr.write("ERROR: Connection Timeout\n")
+                    print(str(total_bytes_received))
+            except socket.timeout:
+                sys.stderr.write("ERROR: Connection Timeout\n")
+            except OSError as e:
+                sys.stderr.write(f"ERROR: {e}\n")
 
     s.close()
     sys.exit()
