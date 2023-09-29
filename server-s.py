@@ -1,17 +1,10 @@
 import socket
-import signal
 import sys
 import threading
 
 socket.setdefaulttimeout(10)
 
-HOST = "0.0.0.0" # Standard loopback interface address (localhost)
-RUNNING = True
-
-def handler(signum, frame):
-    global RUNNING
-    RUNNING = False
-    sys.exit()
+HOST = "0.0.0.0"  # Standard loopback interface address (localhost)
 
 def handle_client(conn, addr):
     try:
@@ -34,7 +27,6 @@ def handle_client(conn, addr):
         sys.stderr.write(f"ERROR: {str(e)}\n")
 
 def main():
-    global RUNNING
     if len(sys.argv) != 2:
         sys.stderr.write("ERROR: Usage - python3 server-s.py <PORT>\n")
         sys.exit(1)
@@ -50,10 +42,6 @@ def main():
         sys.stderr.write("ERROR: Invalid port number.\n")
         sys.exit(1)
 
-    signal.signal(signal.SIGQUIT, handler)
-    signal.signal(signal.SIGTERM, handler)
-    signal.signal(signal.SIGINT, handler)
-
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
             s.bind((HOST, PORT))
@@ -67,9 +55,6 @@ def main():
                     sys.stderr.write("ERROR: Connection Timeout.\n")
         except OSError as e:
             sys.stderr.write(f"ERROR: {str(e)}\n")
-
-    s.close()
-    sys.exit()
 
 if __name__ == "__main__":
     main()
