@@ -1,3 +1,4 @@
+
 import socket
 import signal
 import sys
@@ -29,15 +30,18 @@ def main():
         sys.stderr.write("ERROR: Invalid port number\n")
         sys.exit(1)
 
+    # signal.signal(signal.SIGQUIT, handler)
+    # signal.signal(signal.SIGTERM, handler)
     signal.signal(signal.SIGINT, handler)
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
             s.bind((HOST, PORT))
             s.listen(10)
-
             while RUNNING:
                 conn, addr = s.accept()
+                print(f"Connected by {addr}")
+                print("Sending accio")
                 conn.send(b'accio\r\n')
                 total_bytes_received = 0
 
@@ -47,9 +51,8 @@ def main():
                         if not data:
                             break
                         total_bytes_received += len(data)
-
-                    # Print the total bytes received and nothing else
-                    print(total_bytes_received)
+                        # print("Temp bytes: " + str(total_bytes_received))
+                    print("Total bytes: " + str(total_bytes_received))
 
         except socket.timeout:
             sys.stderr.write("ERROR: Connection Timeout\n")

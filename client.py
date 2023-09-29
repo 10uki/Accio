@@ -19,10 +19,10 @@ def receive_command(s, command):
         raise TimeoutError ("ERROR: Server disconnected for more than 10 seconds.\n")
     return received_data
 
-def send_file(s, file_name):
+def send_file(s, FILE):
     # Open the specified file for reading in binary mode
     try:
-        with open(file_name, 'rb') as file:
+        with open(FILE, 'rb') as file:
             while True:
                 chunk = file.read(max_chunks)
                 if not chunk:
@@ -36,7 +36,6 @@ def send_file(s, file_name):
     except FileNotFoundError:
         sys.stderr.write("ERROR: File not found.\n")
         sys.exit(1)
-    # s.sendall(b'Hello, world')
 
 def establish_connection(HOST, PORT):
     try:
@@ -64,7 +63,7 @@ def client():
         sys.exit(1)
     HOST = sys.argv[1]
     PORT = sys.argv[2]
-    file_name = sys.argv[3]
+    FILE = sys.argv[3]
     try:
         PORT = int(PORT)
         if not (1 <= PORT <= 65535):
@@ -76,12 +75,14 @@ def client():
 
     receive_command(s, b'accio\r\n')
     s.send(b'confirm-accio\r\n')
+    receive_command(s, b'accio\r\n')
     s.send(b'confirm-accio-again\r\n\r\n')
-    send_file(s, file_name)
+    send_file(s, FILE)
     print("File transfer successful")
 
     s.close()
     sys.exit(0)
+
 
 if __name__ == '__main__':
     client()
