@@ -1,7 +1,6 @@
 import socket
 import signal
 import sys
-import threading
 
 socket.setdefaulttimeout(10)
 
@@ -12,18 +11,6 @@ def handler(signum, frame):
     global RUNNING
     RUNNING = False
     sys.exit()
-
-def handle_client(conn, addr):
-    conn.send(b'accio\r\n')
-    total_bytes_received = 0
-
-    with conn:
-        while True:
-            data = conn.recv(1024)
-            if not data:
-                break
-            total_bytes_received += len(data)
-    print(total_bytes_received)
 
 def main():
     global RUNNING
@@ -42,8 +29,6 @@ def main():
         sys.stderr.write("ERROR: Invalid port number\n")
         sys.exit(1)
 
-    signal.signal(signal.SIGQUIT, handler)
-    signal.signal(signal.SIGTERM, handler)
     signal.signal(signal.SIGINT, handler)
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -51,16 +36,26 @@ def main():
             s.bind((HOST, PORT))
             s.listen(10)
 
-            while RUNNING:  # previously running
+            while RUNNING:
                 conn, addr = s.accept()
-                # Create a new thread to handle each client
-                client_thread = threading.Thread(target=handle_client, args=(conn, addr))
-                client_thread.start()
+                conn.send(b'accio\r\n')
+                total_bytes_received = 0
+
+                with conn:
+                    while True:
+                        data = conn.recv(1024)
+                        if not data:
+                            break
+                        total_bytes_received += len(data)
+
+                    # Print the total bytes received and nothing else
+                    print(total_bytes_received)
 
         except socket.timeout:
-            sys.stderr.write("ERROR: Connection Timeout.")
-        except OSError as e:
-            sys.stderr.write(f"ERROR: {e}\n")
+            sys.stderr.write("ERROR: Connection Timeout\n")
+
+    s.close()
+    sys.exit()
 
 if __name__ == "__main__":
     main()
