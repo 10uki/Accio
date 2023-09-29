@@ -1,6 +1,5 @@
 import socket
 import sys
-import threading
 
 socket.setdefaulttimeout(10)
 
@@ -8,15 +7,15 @@ HOST = "0.0.0.0"  # Standard loopback interface address (localhost)
 
 def handle_client(conn, addr):
     try:
-        conn.send(b'accio\r\n')
         total_bytes_received = 0
+        conn.send(b'accio\r\n')
 
         with conn:
             while True:
                 data = conn.recv(1024)
                 if not data:
                     break
-                conn.send(data)
+                conn.sendall(data)
                 total_bytes_received += len(data)
             print(total_bytes_received)
 
@@ -50,7 +49,7 @@ def main():
             while True:
                 try:
                     conn, addr = s.accept()
-                    threading.Thread(target=handle_client, args=(conn, addr)).start()
+                    handle_client(conn, addr)
                 except socket.timeout:
                     sys.stderr.write("ERROR: Connection Timeout.\n")
         except OSError as e:
