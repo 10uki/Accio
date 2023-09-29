@@ -4,16 +4,16 @@ import sys
 
 socket.setdefaulttimeout(10)
 
-HOST = "0.0.0.0"  # Standard loopback interface address (localhost)
-# RUNNING = True
+HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
+RUNNING = True
 
 def handler(signum, frame):
-    # global RUNNING
-    # RUNNING = False
+    global RUNNING
+    RUNNING = False
     sys.exit()
 
 def main():
-    # global RUNNING
+    global RUNNING
     if len(sys.argv) != 2:
         sys.stderr.write("ERROR: Usage - python3 server-s.py <PORT>\n")
         sys.exit(1)
@@ -37,20 +37,20 @@ def main():
         s.bind((HOST, PORT))
         s.listen(10)
 
-        while True: #previously running
+        while RUNNING: #previously running
             try:
                 conn, addr = s.accept()
+                conn.send(b'accio\r\n')
+                total_bytes_received = 0
 
                 with conn:
-                    conn.send(b'accio\r\n')
-                    total_bytes_received = 0
-
+                    file = open('input_file.bin', 'wb')
                     while True:
                         data = conn.recv(1024)
                         if not data:
                             break
                         total_bytes_received += len(data)
-
+                    file.write(data)
                     # Print the total bytes received
                     print(total_bytes_received)
 
