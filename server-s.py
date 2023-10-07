@@ -40,14 +40,14 @@ def handle_client(conn, addr):
         total_bytes_received = 0
         conn.send(b'accio\r\n')
 
-        with conn:
-            while True:
-                data = conn.recv(1024)
-                if not data:
-                    break
-                conn.sendall(data)
-                total_bytes_received += len(data)
-            print(total_bytes_received)
+        while True:
+            data = conn.recv(1024)
+            if not data:
+                break
+            conn.sendall(data)
+            total_bytes_received += len(data)
+
+        print(f"Total bytes received from {addr}: {total_bytes_received}")
 
     except socket.timeout:
         sys.stderr.write(f"ERROR: Connection Timeout.\n")
@@ -73,15 +73,18 @@ def main():
 
     try:
         s = establish_connection(HOST, PORT)
+        print(f"Server is listening on {HOST}:{PORT}")
 
         while True:
             try:
                 conn, addr = s.accept()
+                print(f"Accepted connection from {addr}")
                 handle_client(conn, addr)
             except socket.timeout:
                 sys.stderr.write("ERROR: Connection Timeout.\n")
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
+
 
 if __name__ == "__main__":
     main()
