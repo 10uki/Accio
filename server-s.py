@@ -3,7 +3,7 @@ import sys
 
 socket.setdefaulttimeout(10)
 
-HOST = ""
+HOST = "0.0.0.0"
 
 def handle_client(conn, addr):
     try:
