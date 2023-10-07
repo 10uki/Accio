@@ -1,11 +1,10 @@
 import socket
 import sys
-import multiprocessing
+import threading
 
 socket.setdefaulttimeout(10)
 
-# Use an empty string to bind to all available network interfaces.
-HOST = ''
+HOST = '0.0.0.0'
 
 def handle_client(conn, addr):
     try:
@@ -53,9 +52,10 @@ def main():
                 try:
                     conn, addr = s.accept()
                     print(f"Accepted connection from {addr[0]}:{addr[1]}")
-                    # Use multiprocessing to handle each connection in a separate process
-                    process = multiprocessing.Process(target=handle_client, args=(conn, addr))
-                    process.start()
+
+                    # Use threading to handle each connection in a separate thread
+                    client_thread = threading.Thread(target=handle_client, args=(conn, addr))
+                    client_thread.start()
                 except socket.timeout:
                     sys.stderr.write("ERROR: Connection Timeout.\n")
                 except Exception as e:
