@@ -4,7 +4,7 @@ import threading
 import signal
 import os
 
-socket.setdefaulttimeout(10)
+socket.setdefaulttimeout(50)
 
 HOST = '0.0.0.0'
 file_dir = ""
@@ -26,6 +26,7 @@ def handle_client(conn, addr, connection_number):
         data = conn.recv(1024)
 
         file_path = os.path.join(file_dir, f"{connection_number}.file")
+
         with open(file_path, "wb") as file:
             while data:
                 file.write(data)
