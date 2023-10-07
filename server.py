@@ -1,24 +1,39 @@
 import socket
 import sys
 import threading
+import signal
+import os
 
 socket.setdefaulttimeout(10)
 
 HOST = '0.0.0.0'
+file_dir = ""
 
-def handle_client(conn, addr):
+# Function to handle signals (SIGINT, SIGQUIT, SIGTERM)
+def signal_handler(signum, frame):
+    sys.exit(0)
+
+# Set signal handlers
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGQUIT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
+
+def handle_client(conn, addr, connection_number):
     try:
-        total_bytes_received = 0
         conn.send(b'accio\r\n')
 
-        with conn:
-            while True:
-                data = conn.recv(1024)
-                if not data:
-                    break
-                conn.sendall(data)
+        # Receive and save data into a file
+        data = conn.recv(1024)
+        total_bytes_received = 0
+
+        file_path = os.path.join(file_dir, f"{connection_number}.file")
+        with open(file_path, "wb") as file:
+            while data:
+                file.write(data)
                 total_bytes_received += len(data)
-            print(total_bytes_received)
+                data = conn.recv(1024)
+
+        print(total_bytes_received)
 
     except socket.timeout:
         sys.stderr.write("ERROR: Connection Timeout.\n")
@@ -27,11 +42,13 @@ def handle_client(conn, addr):
         sys.stderr.write(f"ERROR: {str(e)}\n")
 
 def main():
-    if len(sys.argv) != 2:
-        sys.stderr.write("ERROR: Usage - python3 server-s.py <PORT>\n")
+    if len(sys.argv) != 3:
+        sys.stderr.write("ERROR: Usage - python3 server.py <PORT> <FILE-DIR>\n")
         sys.exit(1)
 
+    global file_dir
     PORT = sys.argv[1]
+    file_dir = sys.argv[2]  # Corrected from FILE to file_dir
 
     try:
         # A valid range for TCP port numbers (1-65535).
@@ -42,19 +59,24 @@ def main():
         sys.stderr.write("ERROR: Invalid port number.\n")
         sys.exit(1)
 
+    # Create the file directory if it does not exist
+    os.makedirs(file_dir, exist_ok=True)
+
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
             s.bind((HOST, PORT))
             s.listen(10)
-            print(f"Server is listening on {HOST}:{PORT}")
+            connection_number = 0
 
             while True:
                 try:
                     conn, addr = s.accept()
-                    print(f"Accepted connection from {addr[0]}:{addr[1]}")
+
+                    # Increment the connection number
+                    connection_number += 1
 
                     # Use threading to handle each connection in a separate thread
-                    client_thread = threading.Thread(target=handle_client, args=(conn, addr))
+                    client_thread = threading.Thread(target=handle_client, args=(conn, addr, connection_number))
                     client_thread.start()
                 except socket.timeout:
                     sys.stderr.write("ERROR: Connection Timeout.\n")

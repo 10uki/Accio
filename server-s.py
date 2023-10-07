@@ -3,7 +3,7 @@ import sys
 
 socket.setdefaulttimeout(10)
 
-HOST = "0.0.0.0"
+HOST = "0.0.0.0"  # Standard loopback interface address (localhost)
 
 def handle_client(conn, addr):
     try:
