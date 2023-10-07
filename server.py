@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import socket
 import sys
 import multiprocessing
@@ -20,7 +18,7 @@ def handle_client(conn, addr):
                     break
                 conn.sendall(data)
                 total_bytes_received += len(data)
-            print(total_bytes_received)
+            print(f"Connection from {addr[0]}:{addr[1]} - Total bytes received: {total_bytes_received}")
 
     except socket.timeout:
         sys.stderr.write("ERROR: Connection Timeout.\n")
@@ -48,15 +46,19 @@ def main():
         try:
             s.bind((HOST, PORT))
             s.listen(10)
+            print(f"Server is listening on {HOST}:{PORT}")
 
             while True:
                 try:
                     conn, addr = s.accept()
+                    print(f"Accepted connection from {addr[0]}:{addr[1]}")
                     # Use multiprocessing to handle each connection in a separate process
                     process = multiprocessing.Process(target=handle_client, args=(conn, addr))
                     process.start()
                 except socket.timeout:
                     sys.stderr.write("ERROR: Connection Timeout.\n")
+                except Exception as e:
+                    sys.stderr.write(f"ERROR: {str(e)}\n")
         except OSError as e:
             sys.stderr.write(f"ERROR: {str(e)}\n")
 
