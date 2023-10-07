@@ -74,12 +74,10 @@ def main():
         sys.exit(1)
 
     s = establish_connection(HOST, PORT)
-    print(f"Server is listening on {HOST}:{PORT}\n")
 
     while True:
         try:
             conn, addr = s.accept()
-            print(f"Accepted connection from {addr}\n")
             handle_client(conn, addr)
         except socket.timeout:
             print("ERROR: Connection Timeout.\n")
