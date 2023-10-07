@@ -4,7 +4,7 @@ import threading
 import signal
 import os
 
-socket.setdefaulttimeout(50)
+socket.setdefaulttimeout(10)
 
 HOST = '0.0.0.0'
 file_dir = ""
@@ -18,7 +18,28 @@ signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGQUIT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
-def handle_client(conn, addr, connection_number):
+def establish_connection(host, port):
+    try:
+        # Create a socket object using IPv4 and TCP protocol
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # Set timeout for socket operations
+        s.settimeout(10)
+        try:
+            # Bind the socket to the provided host and port
+            s.bind((host, port))
+            # Listen for incoming connections with a backlog of 10
+            s.listen(10)
+        except socket.error as e:
+            # Handle binding errors and exit with an error message
+            sys.stderr.write(f"ERROR: Connection failed.\n")
+            sys.exit(1)
+        # Return the established socket
+        return s
+    except Exception as e:
+        sys.stderr.write(f"ERROR: {str(e)}\n")
+        sys.exit(1)
+
+def handle_client(conn, connection_number):
     try:
         conn.send(b'accio\r\n')
 
@@ -38,12 +59,14 @@ def handle_client(conn, addr, connection_number):
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
 
+
 def main():
+    global file_dir
+
     if len(sys.argv) != 3:
         sys.stderr.write("ERROR: Usage - python3 server.py <PORT> <FILE-DIR>\n")
         sys.exit(1)
 
-    global file_dir
     PORT = sys.argv[1]
     file_dir = sys.argv[2]
 
@@ -58,24 +81,18 @@ def main():
     # Create the file directory if it does not exist
     os.makedirs(file_dir, exist_ok=True)
 
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        try:
-            s.bind((HOST, PORT))
-            s.listen(10)
-            connection_number = 0
-
-            while True:
-                try:
-                    conn, addr = s.accept()
-                    connection_number += 1
-                    client_thread = threading.Thread(target=handle_client, args=(conn, addr, connection_number))
-                    client_thread.start()
-                except socket.timeout:
-                    sys.stderr.write("ERROR: Connection Timeout.\n")
-                except Exception as e:
-                    sys.stderr.write(f"ERROR: {str(e)}\n")
-        except OSError as e:
-            sys.stderr.write(f"ERROR: {str(e)}\n")
+    with establish_connection(HOST, PORT) as s:
+        connection_number = 0
+        while True:
+            try:
+                conn, addr = s.accept()
+                connection_number += 1
+                client_thread = threading.Thread(target=handle_client, args=(conn, connection_number))
+                client_thread.start()
+            except socket.timeout:
+                sys.stderr.write("ERROR: Connection Timeout.\n")
+            except Exception as e:
+                sys.stderr.write(f"ERROR: {str(e)}\n")
 
 if __name__ == "__main__":
     main()
