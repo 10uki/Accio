@@ -32,7 +32,7 @@ def establish_connection(host, port):
         # Return the established socket
         return s
     except Exception as e:
-        print(f"ERROR: {str(e)}\n")
+        sys.stderr.write(f"ERROR: {str(e)}\n")
         sys.exit(1)
 
 def handle_client(conn, addr):
@@ -52,14 +52,14 @@ def handle_client(conn, addr):
             print(total_bytes_received)
 
     except socket.timeout:
-        print(f"ERROR: Connection Timeout.\n")
+        sys.stderr.write(f"ERROR: Connection Timeout.\n")
 
     except Exception as e:
-        print(f"ERROR: {str(e)}\n")
+        sys.stderr.write(f"ERROR: {str(e)}\n")
 
 def main():
     if len(sys.argv) != 2:
-        print("ERROR: Usage - python3 server-s.py <PORT>\n")
+        sys.stderr.write("ERROR: Usage - python3 server-s.py <PORT>\n")
         sys.exit(1)
 
     PORT = sys.argv[1]
@@ -70,7 +70,7 @@ def main():
         if not 1 <= PORT <= 65535:
             raise ValueError
     except ValueError:
-        print("ERROR: Invalid port number.\n")
+        sys.stderr.write("ERROR: Invalid port number.\n")
         sys.exit(1)
 
     s = establish_connection(HOST, PORT)
@@ -80,9 +80,9 @@ def main():
             conn, addr = s.accept()
             handle_client(conn, addr)
         except socket.timeout:
-            print("ERROR: Connection Timeout.\n")
+            sys.stderr.write("ERROR: Connection Timeout.\n")
         except Exception as e:
-            print(f"ERROR: {str(e)}\n")
+            sys.stderr.write(f"ERROR: {str(e)}\n")
 
 if __name__ == "__main__":
     main()
