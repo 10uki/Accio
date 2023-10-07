@@ -15,7 +15,7 @@ signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGQUIT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
-def establish_connection(host, port):
+def establish_connection(HOST, PORT):
     try:
         # Create a socket object using IPv4 and TCP protocol
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -23,7 +23,7 @@ def establish_connection(host, port):
         s.settimeout(10)
         try:
             # Bind the socket to the provided host and port
-            s.bind((host, port))
+            s.bind((HOST, PORT))
             # Listen for incoming connections with a backlog of 10
             s.listen(10)
         except socket.error as e:
@@ -38,12 +38,10 @@ def establish_connection(host, port):
 def handle_client(conn, addr):
     try:
         total_bytes_received = 0
-
         conn.send(b'accio\r\n')
 
         with conn:
             while True:
-                # Receive and save data into a file
                 data = conn.recv(1024)
                 if not data:
                     break
@@ -73,16 +71,17 @@ def main():
         sys.stderr.write("ERROR: Invalid port number.\n")
         sys.exit(1)
 
-    s = establish_connection(HOST, PORT)
+    try:
+        s = establish_connection(HOST, PORT)
 
-    while True:
-        try:
-            conn, addr = s.accept()
-            handle_client(conn, addr)
-        except socket.timeout:
-            sys.stderr.write("ERROR: Connection Timeout.\n")
-        except Exception as e:
-            sys.stderr.write(f"ERROR: {str(e)}\n")
+        while True:
+            try:
+                conn, addr = s.accept()
+                handle_client(conn, addr)
+            except socket.timeout:
+                sys.stderr.write("ERROR: Connection Timeout.\n")
+    except Exception as e:
+        sys.stderr.write(f"ERROR: {str(e)}\n")
 
 if __name__ == "__main__":
     main()
