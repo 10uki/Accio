@@ -4,7 +4,7 @@ import multiprocessing
 
 socket.setdefaulttimeout(10)
 
-HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
+HOST = "0.0.0.0"  # Listen only on localhost
 
 def handle_client(conn, addr):
     try:
@@ -18,7 +18,7 @@ def handle_client(conn, addr):
                     break
                 conn.sendall(data)
                 total_bytes_received += len(data)
-            print(f"Connection from {addr[0]}:{addr[1]} - Total bytes received: {total_bytes_received}")
+            print(total_bytes_received)
 
     except socket.timeout:
         sys.stderr.write("ERROR: Connection Timeout.\n")
