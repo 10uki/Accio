@@ -4,7 +4,7 @@ import multiprocessing
 
 socket.setdefaulttimeout(10)
 
-HOST = "0.0.0.0"  # Standard loopback interface address (localhost)
+HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 
 def handle_client(conn, addr):
     try:
