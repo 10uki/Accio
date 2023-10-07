@@ -48,10 +48,9 @@ def main():
 
     global file_dir
     PORT = sys.argv[1]
-    file_dir = sys.argv[2]  # Corrected from FILE to file_dir
+    file_dir = sys.argv[2]
 
     try:
-        # A valid range for TCP port numbers (1-65535).
         PORT = int(PORT)
         if not 1 <= PORT <= 65535:
             raise ValueError
@@ -71,11 +70,7 @@ def main():
             while True:
                 try:
                     conn, addr = s.accept()
-
-                    # Increment the connection number
                     connection_number += 1
-
-                    # Use threading to handle each connection in a separate thread
                     client_thread = threading.Thread(target=handle_client, args=(conn, addr, connection_number))
                     client_thread.start()
                 except socket.timeout:
