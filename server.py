@@ -2,6 +2,7 @@
 
 import socket
 import sys
+import multiprocessing
 
 socket.setdefaulttimeout(10)
 
@@ -32,32 +33,32 @@ def main():
         sys.stderr.write("ERROR: Usage - python3 server-s.py <PORT>\n")
         sys.exit(1)
 
-        PORT = sys.argv[1]
+    PORT = sys.argv[1]
 
+    try:
+        # A valid range for TCP port numbers (1-65535).
+        PORT = int(PORT)
+        if not 1 <= PORT <= 65535:
+            raise ValueError
+    except ValueError:
+        sys.stderr.write("ERROR: Invalid port number.\n")
+        sys.exit(1)
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
-            # A valid range for TCP port numbers (1-65535).
-            PORT = int(PORT)
-            if not 1 <= PORT <= 65535:
-                raise ValueError
-        except ValueError:
-            sys.stderr.write("ERROR: Invalid port number.\n")
-            sys.exit(1)
+            s.bind((HOST, PORT))
+            s.listen(10)
 
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            try:
-                s.bind((HOST, PORT))
-                s.listen(10)
+            while True:
+                try:
+                    conn, addr = s.accept()
+                    # Use multiprocessing to handle each connection in a separate process
+                    process = multiprocessing.Process(target=handle_client, args=(conn, addr))
+                    process.start()
+                except socket.timeout:
+                    sys.stderr.write("ERROR: Connection Timeout.\n")
+        except OSError as e:
+            sys.stderr.write(f"ERROR: {str(e)}\n")
 
-                while True:
-                    try:
-                        conn, addr = s.accept()
-                        # Use multiprocessing to handle each connection in a separate process
-                        process = multiprocessing.Process(target=handle_client, args=(conn, addr))
-                        process.start()
-                    except socket.timeout:
-                        sys.stderr.write("ERROR: Connection Timeout.\n")
-            except OSError as e:
-                sys.stderr.write(f"ERROR: {str(e)}\n")
-
-    if __name__ == "__main__":
-        main()
+if __name__ == "__main__":
+    main()
