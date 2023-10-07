@@ -23,7 +23,6 @@ def establish_connection(host, port):
         # Create a socket object using IPv4 and TCP protocol
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # Set timeout for socket operations
-        s.settimeout(10)
         try:
             # Bind the socket to the provided host and port
             s.bind((host, port))
@@ -58,7 +57,6 @@ def handle_client(conn, connection_number):
 
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
-
 
 def main():
     global file_dir
