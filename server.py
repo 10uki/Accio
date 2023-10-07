@@ -4,7 +4,7 @@ import multiprocessing
 
 socket.setdefaulttimeout(10)
 
-HOST = "0.0.0.0"  # Listen only on localhost
+HOST = "0.0.0.0"
 
 def handle_client(conn, addr):
     try:
