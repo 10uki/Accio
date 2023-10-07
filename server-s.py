@@ -1,14 +1,26 @@
 import socket
+import signal
 import sys
 
 socket.setdefaulttimeout(10)
 
 HOST = "0.0.0.0"  # Standard loopback interface address (localhost)
 
+# Function to handle signals (SIGINT, SIGQUIT, SIGTERM)
+def signal_handler(signum, frame):
+    sys.exit(0)
+
+# Set signal handlers
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGQUIT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
+
 def handle_client(conn, addr):
     try:
-        total_bytes_received = 0
         conn.send(b'accio\r\n')
+
+        # Receive data
+        total_bytes_received = 0
 
         with conn:
             while True:
@@ -17,6 +29,7 @@ def handle_client(conn, addr):
                     break
                 conn.sendall(data)
                 total_bytes_received += len(data)
+
             print(total_bytes_received)
 
     except socket.timeout:

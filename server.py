@@ -24,16 +24,12 @@ def handle_client(conn, addr, connection_number):
 
         # Receive and save data into a file
         data = conn.recv(1024)
-        total_bytes_received = 0
 
         file_path = os.path.join(file_dir, f"{connection_number}.file")
         with open(file_path, "wb") as file:
             while data:
                 file.write(data)
-                total_bytes_received += len(data)
                 data = conn.recv(1024)
-
-        print(total_bytes_received)
 
     except socket.timeout:
         sys.stderr.write("ERROR: Connection Timeout.\n")
