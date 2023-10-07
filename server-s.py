@@ -15,32 +15,51 @@ signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGQUIT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
+def establish_connection(host, port):
+    try:
+        # Create a socket object using IPv4 and TCP protocol
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # Set timeout for socket operations
+        s.settimeout(10)
+        try:
+            # Bind the socket to the provided host and port
+            s.bind((host, port))
+            # Listen for incoming connections with a backlog of 10
+            s.listen(10)
+        except socket.error as e:
+            sys.stderr.write(f"ERROR: Connection failed.\n")
+            sys.exit(1)
+        # Return the established socket
+        return s
+    except Exception as e:
+        print(f"ERROR: {str(e)}\n")
+        sys.exit(1)
+
 def handle_client(conn, addr):
     try:
-        conn.send(b'accio\r\n')
-
-        # Receive data
         total_bytes_received = 0
+
+        conn.send(b'accio\r\n')
 
         with conn:
             while True:
+                # Receive and save data into a file
                 data = conn.recv(1024)
                 if not data:
                     break
                 conn.sendall(data)
                 total_bytes_received += len(data)
-
             print(total_bytes_received)
 
     except socket.timeout:
-        sys.stderr.write("ERROR: Connection Timeout.\n")
+        print(f"ERROR: Connection Timeout.\n")
 
     except Exception as e:
-        sys.stderr.write(f"ERROR: {str(e)}\n")
+        print(f"ERROR: {str(e)}\n")
 
 def main():
     if len(sys.argv) != 2:
-        sys.stderr.write("ERROR: Usage - python3 server-s.py <PORT>\n")
+        print("ERROR: Usage - python3 server-s.py <PORT>\n")
         sys.exit(1)
 
     PORT = sys.argv[1]
@@ -51,22 +70,21 @@ def main():
         if not 1 <= PORT <= 65535:
             raise ValueError
     except ValueError:
-        sys.stderr.write("ERROR: Invalid port number.\n")
+        print("ERROR: Invalid port number.\n")
         sys.exit(1)
 
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        try:
-            s.bind((HOST, PORT))
-            s.listen(10)
+    s = establish_connection(HOST, PORT)
+    print(f"Server is listening on {HOST}:{PORT}\n")
 
-            while True:
-                try:
-                    conn, addr = s.accept()
-                    handle_client(conn, addr)
-                except socket.timeout:
-                    sys.stderr.write("ERROR: Connection Timeout.\n")
-        except OSError as e:
-            sys.stderr.write(f"ERROR: {str(e)}\n")
+    while True:
+        try:
+            conn, addr = s.accept()
+            print(f"Accepted connection from {addr}\n")
+            handle_client(conn, addr)
+        except socket.timeout:
+            print("ERROR: Connection Timeout.\n")
+        except Exception as e:
+            print(f"ERROR: {str(e)}\n")
 
 if __name__ == "__main__":
     main()

@@ -8,7 +8,6 @@ socket.setdefaulttimeout(10)
 
 HOST = '0.0.0.0'
 file_dir = ""
-PORT = 5000  # Hardcoded to port 5000
 
 # Function to handle signals (SIGINT, SIGQUIT, SIGTERM)
 def signal_handler(signum, frame):
@@ -63,11 +62,20 @@ def handle_client(conn, connection_number):
 def main():
     global file_dir
 
-    if len(sys.argv) != 2:
-        sys.stderr.write("ERROR: Usage - python3 server.py <FILE-DIR>\n")
+    if len(sys.argv) != 3:
+        sys.stderr.write("ERROR: Usage - python3 server.py <PORT> <FILE-DIR>\n")
         sys.exit(1)
 
-    file_dir = sys.argv[1]
+    PORT = sys.argv[1]
+    file_dir = sys.argv[2]
+
+    try:
+        PORT = int(PORT)
+        if not 1 <= PORT <= 65535:
+            raise ValueError
+    except ValueError:
+        sys.stderr.write("ERROR: Invalid port number.\n")
+        sys.exit(1)
 
     # Create the file directory if it does not exist
     os.makedirs(file_dir, exist_ok=True)
