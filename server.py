@@ -37,7 +37,9 @@ def establish_connection(host, port):
         sys.stderr.write(f"ERROR: {str(e)}\n")
         sys.exit(1)
 
-def handle_client(conn, connection_number, file_path):
+def handle_client(conn, file_path):
+    global file_dir
+
     try:
         # Send first accio command to the client.
         conn.send(b'accio\r\n')
@@ -97,16 +99,15 @@ def main():
     os.makedirs(file_dir, exist_ok=True)
 
     with establish_connection(HOST, PORT) as s:
-        connection_number = 0
         while True:
             try:
                 # Accept a new client connection.
                 conn, addr = s.accept()
-                connection_number += 1
-                # Generate file path for the connection.
-                file_path = os.path.join(file_dir, f"{connection_number}.file")
-                # Create new thread to handle the client with its connection and file path.
-                client_thread = threading.Thread(target=handle_client, args=(conn, connection_number, file_path))
+                # Generate a unique file path for the connection.
+                file_number = len(os.listdir(file_dir)) + 1
+                file_path = os.path.join(file_dir, f"{file_number}.file")
+                # Create a new thread to handle the client with its connection and file path.
+                client_thread = threading.Thread(target=handle_client, args=(conn, file_path))
                 client_thread.start()
             except socket.timeout:
                 sys.stderr.write("ERROR: Connection Timeout.\n")
