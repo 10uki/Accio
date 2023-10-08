@@ -30,11 +30,11 @@ def handle_client(conn, addr):
 
         conn.send(b'accio\r\n')
 
-        with file_lock:  # Acquire the lock before file operations
-            with open(f'received_file_from_{addr[0]}_{addr[1]}.bin', 'wb') as file:
+        file_name = f'received_file_from_{addr[0]}_{addr[1]}.bin'
+        with file_lock:
+            with open(file_name, 'wb') as file:
                 while True:
                     data = conn.recv(1024)
-                    file_lock.release()
                     if not data:
                         break
                     file.write(data)
