@@ -41,14 +41,18 @@ def establish_connection(host, port):
 
 def handle_client(conn, connection_number, file_path):
     try:
+        # Send first accio command to the client.
         conn.send(b'accio\r\n')
 
+        # Receive confirmation from the client.
         confirmation = conn.recv(1024)
         if confirmation != b'confirm-accio\r\n':
             raise RuntimeError("Error: Invalid confirmation.")
 
+        # Send second accio command to the client.
         conn.send(b'accio\r\n')
 
+        # Receive and save the binary data sent by the client.
         with open(file_path, "wb") as file:
             data = conn.recv(1024)
             data_time = time.time()  # Track the time of the last received data
@@ -56,11 +60,13 @@ def handle_client(conn, connection_number, file_path):
                 file.write(data)
                 data_time = time.time()  # Update the last data time
                 data = conn.recv(1024)
+
+                # Check for a timeout condition and raise an exception.
                 if time.time() - data_time > 10:
-                    raise socket.timeout("Connection Timeout")
+                    raise socket.timeout("ERROR: Connection Timeout")
 
     except socket.timeout:
-        sys.stderr.write(f"ERROR: Connection Timeout for connection {connection_number}.\n")
+        sys.stderr.write("ERROR: Connection Timeout.\n")
         # Write "ERROR" into the corresponding file and reset its content
         with open(file_path, "wb") as file:
             file.write(b"ERROR")
