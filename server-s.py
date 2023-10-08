@@ -24,10 +24,7 @@ def handle_client(conn, addr):
             data = conn.recv(1024)
             if not data:
                 break
-            sent = conn.send(data)  # Send the received data back to the client
-            if sent == 0:
-                sys.stderr.write("ERROR: Server disconnected.\n")
-                raise RuntimeError
+            conn.sendall(data)  # Send the received data back to the client
             total_bytes_received += len(data)
 
             print(total_bytes_received)
@@ -77,15 +74,16 @@ def main():
 
     s = establish_connection(PORT)
 
-    try:
-        conn, addr = s.accept()
-        # Start a new thread to handle the client
-        client_thread = threading.Thread(target=handle_client, args=(conn, addr))
-        client_thread.start()
-    except socket.timeout:
-        sys.stderr.write("ERROR: Connection Timeout.\n")
-    except Exception as e:
-        sys.stderr.write(f"ERROR: {str(e)}\n")
+    while True:
+        try:
+            conn, addr = s.accept()
+            # Start a new thread to handle the client
+            client_thread = threading.Thread(target=handle_client, args=(conn, addr))
+            client_thread.start()
+        except socket.timeout:
+            sys.stderr.write("ERROR: Connection Timeout.\n")
+        except Exception as e:
+            sys.stderr.write(f"ERROR: {str(e)}\n")
 
 if __name__ == "__main__":
     main()

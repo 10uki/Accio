@@ -17,7 +17,7 @@ def receive_command(s, command):
             received_data += chunk
     except socket.timeout:
         sys.stderr.write("ERROR: Connection Timeout.\n")
-        raise TimeoutError("ERROR: Server disconnected for more than 10 seconds.\n")
+        raise TimeoutError
     return received_data
 
 def send_file(s, FILE):
