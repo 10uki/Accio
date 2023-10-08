@@ -2,15 +2,13 @@ import socket
 import signal
 import sys
 import threading
-import random
 import time
 
 socket.setdefaulttimeout(10)
 
 # Constants
 HOST = "0.0.0.0"
-ERROR_PROBABILITY = 0.1
-DELAY_TIME = 0.5
+HEADER_SIZE= len(b'accio\r\n') * 2
 
 # Create a global lock.
 file_lock = threading.Lock()
@@ -63,11 +61,6 @@ def handle_client(conn, addr):
                 data = conn.recv(1024)
                 if not data:
                     break
-                # Simulate transmission error.
-                if random.random() < ERROR_PROBABILITY:
-                    continue
-                # Simulate delay.
-                time.sleep(DELAY_TIME)
                 # Update received bytes.
                 received_bytes += len(data)
             except socket.timeout:
@@ -78,7 +71,7 @@ def handle_client(conn, addr):
                 break
 
         # Print only the total received bytes (excluding the header) after each file transfer
-        print(received_bytes - len(b'accio\r\n') * 2)
+        print(received_bytes - HEADER_SIZE)
 
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
