@@ -29,7 +29,7 @@ def handle_client(conn, addr):
             while bytes_sent < len(data):
                 sent = conn.send(data[bytes_sent:])
                 if sent == 0:
-                    raise RuntimeError("Socket connection broken")
+                    raise RuntimeError("Error: Connection broken.")
                 bytes_sent += sent
             total_bytes_received += len(data)
 
@@ -40,6 +40,8 @@ def handle_client(conn, addr):
 
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
+    finally:
+        conn.close()
 
 def establish_connection(PORT):
     try:
@@ -72,9 +74,10 @@ def main():
 
     try:
         s = establish_connection(PORT)
-        conn, addr = s.accept()
-        client_thread = threading.Thread(target=handle_client, args=(conn, addr))
-        client_thread.start()
+        while True:
+            conn, addr = s.accept()
+            client_thread = threading.Thread(target=handle_client, args=(conn, addr))
+            client_thread.start()
     except socket.timeout:
         sys.stderr.write("ERROR: Connection Timeout.\n")
     except Exception as e:
