@@ -14,9 +14,8 @@ def signal_handler(signum, frame):
     sys.exit(0)
 
 # Set signal handlers
-signal.signal(signal.SIGINT, signal_handler)
-signal.signal(signal.SIGQUIT, signal_handler)
-signal.signal(signal.SIGTERM, signal_handler)
+for sig in [signal.SIGINT, signal.SIGQUIT, signal.SIGTERM]:
+    signal.signal(sig, signal_handler)
 
 def establish_connection(host, port):
     try:
