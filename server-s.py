@@ -35,6 +35,26 @@ def handle_client(conn, addr):
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
 
+def establish_connection(PORT):
+    try:
+        # Create a socket object using IPv4 and TCP protocol
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # Set timeout for socket operations
+        s.settimeout(10)
+        try:
+            # Bind the socket to the provided host (0.0.0.0) and port
+            s.bind((HOST, PORT))
+            # Listen for incoming connections with a backlog of 10
+            s.listen(10)
+        except socket.error:
+            sys.stderr.write("ERROR: Connection failed.\n")
+            raise
+        # Return the established socket
+        return s
+    except Exception as e:
+        sys.stderr.write(f"ERROR: {str(e)}\n")
+        raise
+
 def main():
     if len(sys.argv) != 2:
         sys.stderr.write("ERROR: Usage - python3 server-s.py <PORT>\n")
@@ -52,14 +72,7 @@ def main():
         sys.exit(1)
 
     try:
-        # Create a socket object using IPv4 and TCP protocol
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # Set timeout for socket operations
-        s.settimeout(10)
-        # Bind the socket to the provided host and port
-        s.bind((HOST, PORT))
-        # Listen for incoming connections with a backlog of 10
-        s.listen(10)
+        s = establish_connection(PORT)
 
         while True:
             try:
@@ -69,6 +82,7 @@ def main():
                 client_thread.start()
             except socket.timeout:
                 sys.stderr.write("ERROR: Connection Timeout.\n")
+                break  # Exit the loop on timeout
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
 
