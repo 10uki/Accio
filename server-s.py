@@ -4,6 +4,7 @@ import sys
 import threading
 import random
 import time
+import atexit
 
 socket.setdefaulttimeout(10)
 
@@ -14,6 +15,9 @@ DELAY_TIME = 0.5
 
 # Create a global lock
 file_lock = threading.Lock()
+
+# Create a global variable to store the total received bytes
+total_received_bytes = 0
 
 # Function to handle signals (SIGINT, SIGQUIT, SIGTERM)
 def signal_handler(signum, frame):
@@ -43,6 +47,8 @@ def establish_connection(host, port):
         sys.exit(1)
 
 def handle_client(conn, addr):
+    global total_received_bytes  # Use the global variable
+
     try:
         conn.send(b'accio\r\n')
 
@@ -66,18 +72,17 @@ def handle_client(conn, addr):
                 # Simulate transmission error.
                 if random.random() < ERROR_PROBABILITY:
                     continue
-                # Simulate delay
+                # Simulate delay.
                 time.sleep(DELAY_TIME)
                 # Update received bytes.
                 received_bytes += len(data)
+                total_received_bytes += len(data)  # Update the global total
             except socket.timeout:
                 sys.stderr.write("ERROR: Connection Timeout.\n")
                 break
             except socket.error as e:
                 sys.stderr.write("ERROR: Transmission error: {}\n".format(e))
                 break
-
-        print(received_bytes)
 
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
@@ -115,3 +120,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Print only the total received bytes (excluding the header) when the server exits
+atexit.register(lambda: print(total_received_bytes - len(b'accio\r\n') * 2))
