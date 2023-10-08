@@ -14,13 +14,10 @@ file_dir = ""
 def signal_handler(signum, frame):
     sys.exit(0)
 
-# Function to register signal handlers
-def register_signal_handlers():
-    for sig in [signal.SIGINT, signal.SIGQUIT, signal.SIGTERM]:
-        signal.signal(sig, signal_handler)
-
-# Register signal handlers
-register_signal_handlers()
+# Set signal handlers
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGQUIT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 def establish_connection(host, port):
     try:
