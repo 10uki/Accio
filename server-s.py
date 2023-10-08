@@ -59,7 +59,7 @@ def handle_client(conn, addr):
             try:
                 # Set timeout to 10 seconds for receiving data.
                 conn.settimeout(10)
-                # Receive .
+                # Receive data.
                 data = conn.recv(1024)
                 if not data:
                     break
@@ -68,7 +68,7 @@ def handle_client(conn, addr):
                     continue
                 # Simulate delay
                 time.sleep(DELAY_TIME)
-                # Update receivedBytes .
+                # Update received bytes.
                 received_bytes += len(data)
             except socket.timeout:
                 sys.stderr.write("ERROR: Connection Timeout.\n")
