@@ -9,8 +9,6 @@ socket.setdefaulttimeout(10)
 
 HOST = '0.0.0.0'
 file_dir = ""
-# Create a global lock
-file_lock = threading.Lock()
 
 # Function to handle signals (SIGINT, SIGQUIT, SIGTERM)
 def signal_handler(signum, frame):
@@ -107,7 +105,7 @@ def main():
                 connection_number += 1
                 # Generate file path for the connection.
                 file_path = os.path.join(file_dir, f"{connection_number}.file")
-                # Create new thread to handle the client with it's connection and file path.
+                # Create new thread to handle the client with its connection and file path.
                 client_thread = threading.Thread(target=handle_client, args=(conn, connection_number, file_path))
                 client_thread.start()
             except socket.timeout:
