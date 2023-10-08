@@ -12,10 +12,12 @@ def receive_command(s, command):
         while not received_data.endswith(command):
             chunk = s.recv(1)
             if not chunk:
-                raise ConnectionError ("ERROR: Server disconnected.\n")
+                sys.stderr.write("ERROR: Server disconnected.\n")
+                raise ConnectionError
             received_data += chunk
     except socket.timeout:
-        sys.stderr.write ("ERROR: Connection Timeout.\n")
+        sys.stderr.write("ERROR: Connection Timeout.\n")
+        raise TimeoutError("ERROR: Server disconnected for more than 10 seconds.\n")
     return received_data
 
 def send_file(s, FILE):
@@ -30,7 +32,8 @@ def send_file(s, FILE):
                 while total_sent < len(chunk):
                     sent = s.send(chunk[total_sent:])
                     if sent == 0:
-                        raise RuntimeError("ERROR: Socket connection broken.\n")
+                        sys.stderr.write("ERROR: Socket connection broken.\n")
+                        raise RuntimeError
                     total_sent += sent
     except FileNotFoundError:
         sys.stderr.write("ERROR: File not found.\n")
@@ -46,17 +49,15 @@ def establish_connection(HOST, PORT):
             # Attempt to connect to the server using the provided host and port
             s.connect((HOST, PORT))
         except socket.error:
-            # Handle connection errors and exit with an error message
             sys.stderr.write("ERROR: Connection failed.\n")
-            sys.exit(1)
+            raise
         # Return the established socket
         return s
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
-        sys.exit(1)
+        raise
 
 def client():
-
     if len(sys.argv) != 4:
         sys.stderr.write("ERROR: Usage - python3 client.py <HOSTNAME-OR-IP> <PORT> <FILENAME>\n")
         sys.exit(1)
@@ -67,7 +68,7 @@ def client():
 
     try:
         PORT = int(PORT)
-        if not (1 <= PORT<= 65535):
+        if not (1 <= PORT <= 65535):
             sys.stderr.write("ERROR: Invalid port number.\n")
             sys.exit(1)
     except ValueError:
@@ -76,12 +77,15 @@ def client():
 
     s = establish_connection(HOST, PORT)
 
-    receive_command(s, b'accio\r\n')
-    s.send(b'confirm-accio\r\n')
-    receive_command(s, b'accio\r\n')
-    s.send(b'confirm-accio-again\r\n\r\n')
-    send_file(s, FILE)
-    print("File transfer successful")
+    try:
+        receive_command(s, b'accio\r\n')
+        s.send(b'confirm-accio\r\n')
+        receive_command(s, b'accio\r\n')
+        s.send(b'confirm-accio-again\r\n\r\n')
+        send_file(s, FILE)
+        print("File transfer successful")
+    except TimeoutError:
+        sys.stderr.write("ERROR: Server disconnected for more than 10 seconds.\n")
 
     s.close()
     sys.exit(0)
