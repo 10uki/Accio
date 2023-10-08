@@ -51,18 +51,12 @@ def handle_client(conn, addr):
 
         bytes_received = 0
 
-        with file_lock:  # Acquire the lock before file operations
-            with open('received_file.bin', 'wb') as file:
-                header_received = False
-                while True:
-                    data = conn.recv(1024)
-                    if not data:
-                        break
-                    file.write(data)
-                    bytes_received = len(data)
-                    # if not header_received:
-                    #     bytes_received -= HEADER_SIZE # Subtract the header size from within the loop.
-                    #     header_received = True
+        while True:
+            chunk = conn.recv(1024)  # Receive data in 1024-byte chunks
+            if not chunk:
+                break
+            bytes_received += len(chunk)  # Update the total bytes received
+
         print(bytes_received)
 
     except socket.timeout:
