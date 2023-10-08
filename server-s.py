@@ -70,9 +70,6 @@ def handle_client(conn, addr):
                 # Print only the total received bytes (excluding the header) after each file transfer.
                 print(bytes_received - HEADER_SIZE)
 
-                # Send a confirmation after receiving a file (you can customize this if needed).
-                conn.send(b'file-received\r\n')
-
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
 
