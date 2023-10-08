@@ -12,29 +12,8 @@ def signal_handler(signum, frame):
     sys.exit(0)
 
 # Set signal handlers
-signal.signal(signal.SIGINT, signal_handler)
-signal.signal(signal.SIGQUIT, signal_handler)
-signal.signal(signal.SIGTERM, signal_handler)
-
-def establish_connection(HOST, PORT):
-    try:
-        # Create a socket object using IPv4 and TCP protocol
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # Set timeout for socket operations
-        s.settimeout(10)
-        try:
-            # Bind the socket to the provided host and port
-            s.bind((HOST, PORT))
-            # Listen for incoming connections with a backlog of 10
-            s.listen(10)
-        except socket.error:
-            sys.stderr.write("ERROR: Connection failed.\n")
-            sys.exit(1)
-        # Return the established socket
-        return s
-    except Exception as e:
-        sys.stderr.write(f"ERROR: {str(e)}\n")
-        sys.exit(1)
+for sig in [signal.SIGINT, signal.SIGQUIT, signal.SIGTERM]:
+    signal.signal(sig, signal_handler)
 
 def handle_client(conn, addr):
     try:
@@ -73,7 +52,14 @@ def main():
         sys.exit(1)
 
     try:
-        s = establish_connection(HOST, PORT)
+        # Create a socket object using IPv4 and TCP protocol
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # Set timeout for socket operations
+        s.settimeout(10)
+        # Bind the socket to the provided host and port
+        s.bind((HOST, PORT))
+        # Listen for incoming connections with a backlog of 10
+        s.listen(10)
 
         while True:
             try:
