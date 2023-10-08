@@ -37,9 +37,9 @@ def handle_client(conn, addr):
                     if not data:
                         break
                     file.write(data)
-                    total_bytes_received += len(data)  # Update the byte counter
+                    total_bytes_received += len(data)
 
-        print(f"Received {total_bytes_received} bytes from {addr[0]}:{addr[1]}")
+        print(total_bytes_received)
 
     except socket.timeout:
         sys.stderr.write("ERROR: Connection Timeout.\n")
