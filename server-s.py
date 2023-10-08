@@ -105,7 +105,7 @@ def main():
         while True:
             try:
                 conn, addr = s.accept()
-                # Start a new thread to handle the client
+                # Start a new thread to handle the client.
                 client_thread = threading.Thread(target=handle_client, args=(conn, addr))
                 client_thread.start()
             except socket.timeout:
