@@ -15,27 +15,27 @@ def signal_handler(signum, frame):
 for sig in [signal.SIGINT, signal.SIGQUIT, signal.SIGTERM]:
     signal.signal(sig, signal_handler)
 
+def handle_client(conn, addr):
+    try:
+        total_bytes_received = 0
+        conn.send(b'accio\r\n')
+
+        while True:
+            data = conn.recv(1024)
+            if not data:
+                break
+            conn.sendall(data)
+            total_bytes_received += len(data)
+
+        print(total_bytes_received)
+
+    except socket.timeout:
+        sys.stderr.write("ERROR: Connection Timeout.\n")
+
+    except Exception as e:
+        sys.stderr.write(f"ERROR: {str(e)}\n")
+
 def main():
-    def handle_client(conn, addr):
-        try:
-            total_bytes_received = 0
-            conn.send(b'accio\r\n')
-
-            while True:
-                data = conn.recv(1024)
-                if not data:
-                    break
-                conn.sendall(data)
-                total_bytes_received += len(data)
-
-            print(total_bytes_received)
-
-        except socket.timeout:
-            sys.stderr.write("ERROR: Connection Timeout.\n")
-
-        except Exception as e:
-            sys.stderr.write(f"ERROR: {str(e)}\n")
-
     if len(sys.argv) != 2:
         sys.stderr.write("ERROR: Usage - python3 server-s.py <PORT>\n")
         sys.exit(1)

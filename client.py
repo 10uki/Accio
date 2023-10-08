@@ -1,13 +1,13 @@
 import socket
 import sys
 
-# Constants
+socket.setdefaulttimeout(10)
+
 MAX_CHUNKS = 10000
-TIMEOUT = 10.0
 
 def receive_command(s, command):
     received_data = b""
-    s.settimeout(TIMEOUT)
+    s.settimeout(10)
     try:
         while not received_data.endswith(command):
             chunk = s.recv(1)
@@ -15,7 +15,7 @@ def receive_command(s, command):
                 raise ConnectionError ("ERROR: Server disconnected.\n")
             received_data += chunk
     except socket.timeout:
-        raise TimeoutError ("ERROR: Server disconnected for more than 10 seconds.\n")
+        sys.stderr.write ("ERROR: Connection Timeout.\n")
     return received_data
 
 def send_file(s, FILE):
@@ -41,11 +41,11 @@ def establish_connection(HOST, PORT):
         # Create a socket object using IPv4 and TCP protocol
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # Set timeout for socket operations
-        s.settimeout(TIMEOUT)
+        s.settimeout(10)
         try:
             # Attempt to connect to the server using the provided host and port
             s.connect((HOST, PORT))
-        except socket.error as e:
+        except socket.error:
             # Handle connection errors and exit with an error message
             sys.stderr.write("ERROR: Connection failed.\n")
             sys.exit(1)
