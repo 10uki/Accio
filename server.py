@@ -6,16 +6,21 @@ import os
 
 socket.setdefaulttimeout(10)
 
-HOST = '0.0.0.0'
+# Define host and file_dir
+HOST = '0.0.0.0'  # Standard loopback interface address (localhost)
 file_dir = ""
 
 # Function to handle signals (SIGINT, SIGQUIT, SIGTERM)
 def signal_handler(signum, frame):
     sys.exit(0)
 
-# Set signal handlers
-for sig in [signal.SIGINT, signal.SIGQUIT, signal.SIGTERM]:
-    signal.signal(sig, signal_handler)
+# Function to register signal handlers
+def register_signal_handlers():
+    for sig in [signal.SIGINT, signal.SIGQUIT, signal.SIGTERM]:
+        signal.signal(sig, signal_handler)
+
+# Register signal handlers
+register_signal_handlers()
 
 def establish_connection(host, port):
     try:
@@ -28,7 +33,7 @@ def establish_connection(host, port):
             s.bind((host, port))
             # Listen for incoming connections with a backlog of 10
             s.listen(10)
-        except socket.error as e:
+        except socket.error:
             # Handle binding errors and exit with an error message
             sys.stderr.write(f"ERROR: Connection failed.\n")
             sys.exit(1)

@@ -1,6 +1,7 @@
 import socket
 import signal
 import sys
+import threading
 
 socket.setdefaulttimeout(10)
 
@@ -11,8 +12,9 @@ def signal_handler(signum, frame):
     sys.exit(0)
 
 # Set signal handlers
-for sig in [signal.SIGINT, signal.SIGQUIT, signal.SIGTERM]:
-    signal.signal(sig, signal_handler)
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGQUIT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 def establish_connection(HOST, PORT):
     try:
@@ -25,7 +27,7 @@ def establish_connection(HOST, PORT):
             s.bind((HOST, PORT))
             # Listen for incoming connections with a backlog of 10
             s.listen(10)
-        except socket.error as e:
+        except socket.error:
             sys.stderr.write(f"ERROR: Connection failed.\n")
             sys.exit(1)
         # Return the established socket
@@ -76,7 +78,9 @@ def main():
         while True:
             try:
                 conn, addr = s.accept()
-                handle_client(conn, addr)
+                # Start a new thread to handle the client
+                client_thread = threading.Thread(target=handle_client, args=(conn, addr))
+                client_thread.start()
             except socket.timeout:
                 sys.stderr.write("ERROR: Connection Timeout.\n")
     except Exception as e:
