@@ -17,21 +17,17 @@ for sig in [signal.SIGINT, signal.SIGQUIT, signal.SIGTERM]:
 
 def handle_client(conn, addr):
     try:
-        total_bytes_received = 0
         conn.send(b'accio\r\n')
 
-        while True:
-            data = conn.recv(1024)
-            if not data:
-                break
-            # Send data in smaller chunks
-            bytes_sent = 0
-            while bytes_sent < len(data):
-                sent = conn.send(data[bytes_sent:])
-                if sent == 0:
-                    raise RuntimeError("Error: Connection broken.")
-                bytes_sent += sent
-            total_bytes_received += len(data)
+        total_bytes_received = 0  # Initialize the byte counter
+
+        with open(f'received_file_from_{addr[0]}_{addr[1]}.bin', 'wb') as file:
+            while True:
+                data = conn.recv(1024)
+                if not data:
+                    break
+                file.write(data)
+                total_bytes_received += len(data)  # Update the byte counter
 
         print(total_bytes_received)
 
