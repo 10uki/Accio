@@ -41,31 +41,36 @@ def handle_client(conn, addr):
     try:
         conn.send(b'accio\r\n')
 
-        total_bytes_received = 0
-
         confirmation = conn.recv(1024)
         if confirmation != b'confirm-accio\r\n':
             raise RuntimeError("Error: Invalid confirmation.")
 
         conn.send(b'accio\r\n')
 
-        file_name = f'received_file_from_{addr[0]}_{addr[1]}.bin'
-        with file_lock:
-            with open(file_name, 'wb') as file:
-                while True:
-                    data = conn.recv(1024)
-                    if not data:
-                        break
-                    file.write(data)
-                    total_bytes_received += len(data)
+        while True:  # Loop to handle multiple files within a single client connection
+            total_bytes_received = 0
 
-        print(total_bytes_received)
+            file_name = f'received_file_from_{addr[0]}_{addr[1]}_{total_bytes_received}.bin'
+            with file_lock:
+                with open(file_name, 'wb') as file:
+                    while True:
+                        data = conn.recv(1024)
+                        if not data:
+                            break
+                        file.write(data)
+                        total_bytes_received += len(data)
+
+            if total_bytes_received == 0:
+                break
+
+            print(total_bytes_received)
 
     except socket.timeout:
         sys.stderr.write("ERROR: Connection Timeout.\n")
 
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
+
     finally:
         conn.close()
 
