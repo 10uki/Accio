@@ -12,13 +12,16 @@ HOST = '0.0.0.0'
 # Create a global lock.
 file_lock = threading.Lock()
 
+
 # Function to handle signals (SIGINT, SIGQUIT, SIGTERM)
 def signal_handler(signum, frame):
     sys.exit(0)
 
+
 # Set signal handlers
 for sig in [signal.SIGINT, signal.SIGQUIT, signal.SIGTERM]:
     signal.signal(sig, signal_handler)
+
 
 def establish_connection(host, port):
     try:
@@ -38,6 +41,7 @@ def establish_connection(host, port):
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
         sys.exit(1)
+
 
 def handle_client(conn, file_dir, file_number):
     try:
@@ -63,8 +67,11 @@ def handle_client(conn, file_dir, file_number):
                 break
             data += chunk
 
-            # Update the last data time
-            data_time = time.time()
+    except socket.timeout:
+        data = b"ERROR"
+
+        # Update the last data time
+        data_time = time.time()
 
         # Check if no data received for more than 10 seconds
         if time.time() - data_time > 10:
@@ -85,6 +92,7 @@ def handle_client(conn, file_dir, file_number):
 
     finally:
         conn.close()
+
 
 def main():
     if len(sys.argv) != 3:
@@ -114,6 +122,7 @@ def main():
                 sys.stderr.write("ERROR: Connection Timeout.\n")
             except Exception as e:
                 sys.stderr.write(f"ERROR: {str(e)}\n")
+
 
 if __name__ == "__main__":
     main()
