@@ -6,9 +6,10 @@ import os
 
 socket.setdefaulttimeout(10)
 
-# Define host and file_dir
-HOST = '0.0.0.0'  # Standard loopback interface address (localhost)
+HOST = '0.0.0.0'
 file_dir = ""
+# Create a global lock
+file_lock = threading.Lock()
 
 # Function to handle signals (SIGINT, SIGQUIT, SIGTERM)
 def signal_handler(signum, frame):
@@ -17,6 +18,7 @@ def signal_handler(signum, frame):
 # Set signal handlers
 for sig in [signal.SIGINT, signal.SIGQUIT, signal.SIGTERM]:
     signal.signal(sig, signal_handler)
+
 
 def establish_connection(host, port):
     try:
@@ -29,7 +31,7 @@ def establish_connection(host, port):
             s.bind((host, port))
             # Listen for incoming connections with a backlog of 10
             s.listen(10)
-        except socket.error:
+        except socket.error as e:
             # Handle binding errors and exit with an error message
             sys.stderr.write(f"ERROR: Connection failed.\n")
             sys.exit(1)
@@ -43,8 +45,13 @@ def handle_client(conn, connection_number):
     try:
         conn.send(b'accio\r\n')
 
-        # Receive and save data into a file
-        data = conn.recv(1024)
+        total_bytes_received = 0
+
+        confirmation = conn.recv(1024)
+        if confirmation != b'confirm-accio\r\n':
+            raise RuntimeError("Error: Invalid confirmation.")
+
+        conn.send(b'accio\r\n')
 
         file_path = os.path.join(file_dir, f"{connection_number}.file")
 
