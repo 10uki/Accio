@@ -28,7 +28,7 @@ def establish_connection(HOST, PORT):
             # Listen for incoming connections with a backlog of 10
             s.listen(10)
         except socket.error:
-            sys.stderr.write(f"ERROR: Connection failed.\n")
+            sys.stderr.write("ERROR: Connection failed.\n")
             sys.exit(1)
         # Return the established socket
         return s
@@ -51,7 +51,7 @@ def handle_client(conn, addr):
         print(total_bytes_received)
 
     except socket.timeout:
-        sys.stderr.write(f"ERROR: Connection Timeout.\n")
+        sys.stderr.write("ERROR: Connection Timeout.\n")
 
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
