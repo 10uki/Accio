@@ -7,7 +7,10 @@ import time
 
 socket.setdefaulttimeout(10)
 
+# Constants
 HOST = "0.0.0.0"
+ERROR_PROBABILITY = 0.1
+DELAY_TIME = 1
 
 # Create a global lock
 file_lock = threading.Lock()
@@ -19,10 +22,6 @@ def signal_handler(signum, frame):
 # Set signal handlers
 for sig in [signal.SIGINT, signal.SIGQUIT, signal.SIGTERM]:
     signal.signal(sig, signal_handler)
-
-# Define constants for error simulation
-ERROR_PROBABILITY = 0.1  # Adjust as needed
-DELAY_TIME = 1  # Adjust as needed
 
 def establish_connection(host, port):
     try:
