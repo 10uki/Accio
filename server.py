@@ -102,9 +102,12 @@ def main():
         connection_number = 0
         while True:
             try:
+                # Accept a new client connection.
                 conn, addr = s.accept()
                 connection_number += 1
+                # Generate file path for the connection.
                 file_path = os.path.join(file_dir, f"{connection_number}.file")
+                # Create new thread to handle the client with it's connection and file path.
                 client_thread = threading.Thread(target=handle_client, args=(conn, connection_number, file_path))
                 client_thread.start()
             except socket.timeout:
