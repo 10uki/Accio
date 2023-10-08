@@ -7,16 +7,13 @@ socket.setdefaulttimeout(10)
 
 HOST = "0.0.0.0"  # Standard loopback interface address (localhost)
 
-
 # Function to handle signals (SIGINT, SIGQUIT, SIGTERM)
 def signal_handler(signum, frame):
     sys.exit(0)
 
-
 # Set signal handlers
 for sig in [signal.SIGINT, signal.SIGQUIT, signal.SIGTERM]:
     signal.signal(sig, signal_handler)
-
 
 def handle_client(conn, addr):
     try:
@@ -27,17 +24,19 @@ def handle_client(conn, addr):
             data = conn.recv(1024)
             if not data:
                 break
-            conn.sendall(data)
+            sent = conn.send(data)  # Send the received data back to the client
+            if sent == 0:
+                sys.stderr.write("ERROR: Server disconnected.\n")
+                raise RuntimeError
             total_bytes_received += len(data)
 
-        print(total_bytes_received)
+            print(total_bytes_received)
 
     except socket.timeout:
         sys.stderr.write("ERROR: Connection Timeout.\n")
 
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
-
 
 def establish_connection(PORT):
     try:
@@ -58,7 +57,6 @@ def establish_connection(PORT):
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
         raise
-
 
 def main():
     if len(sys.argv) != 2:
@@ -88,7 +86,6 @@ def main():
         sys.stderr.write("ERROR: Connection Timeout.\n")
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
-
 
 if __name__ == "__main__":
     main()
