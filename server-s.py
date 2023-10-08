@@ -10,7 +10,7 @@ socket.setdefaulttimeout(10)
 # Constants
 HOST = "0.0.0.0"
 ERROR_PROBABILITY = 0.1
-DELAY_TIME = 1
+DELAY_TIME = 0.5
 
 # Create a global lock
 file_lock = threading.Lock()
