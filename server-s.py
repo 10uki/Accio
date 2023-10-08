@@ -7,6 +7,9 @@ socket.setdefaulttimeout(10)
 
 HOST = "0.0.0.0"
 
+# Create a global lock
+file_lock = threading.Lock()
+
 # Function to handle signals (SIGINT, SIGQUIT, SIGTERM)
 def signal_handler(signum, frame):
     sys.exit(0)
@@ -27,15 +30,16 @@ def handle_client(conn, addr):
 
         conn.send(b'accio\r\n')
 
-        with open(f'received_file_from_{addr[0]}_{addr[1]}.bin', 'wb') as file:
-            while True:
-                data = conn.recv(1024)
-                if not data:
-                    break
-                file.write(data)
-                total_bytes_received += len(data)  # Update the byte counter
+        with file_lock:  # Acquire the lock before file operations
+            with open(f'received_file_from_{addr[0]}_{addr[1]}.bin', 'wb') as file:
+                while True:
+                    data = conn.recv(1024)
+                    if not data:
+                        break
+                    file.write(data)
+                    total_bytes_received += len(data)  # Update the byte counter
 
-        print(total_bytes_received)
+        print(f"Received {total_bytes_received} bytes from {addr[0]}:{addr[1]}")
 
     except socket.timeout:
         sys.stderr.write("ERROR: Connection Timeout.\n")
