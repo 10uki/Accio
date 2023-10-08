@@ -62,6 +62,9 @@ def handle_client(conn, addr):
 
         print(bytes_received - HEADER_SIZE)
 
+    except socket.timeout:
+        sys.stderr.write("ERROR: Connection Timeout.\n")
+
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
 
