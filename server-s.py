@@ -50,28 +50,23 @@ def handle_client(conn, addr):
 
         conn.send(b'accio\r\n')
 
-        expected_bytes = 1024
-        received_bytes = 0
+        while True:  # Loop to handle multiple files within a single client connection
 
-        while received_bytes < expected_bytes:
-            try:
-                # Set timeout to 10 seconds for receiving data.
-                conn.settimeout(10)
-                # Receive data.
-                data = conn.recv(1024)
-                if not data:
-                    break
-                # Update received bytes.
-                received_bytes += len(data)
-            except socket.timeout:
-                sys.stderr.write("ERROR: Connection Timeout.\n")
-                break
-            except socket.error as e:
-                sys.stderr.write("ERROR: Transmission error: {}\n".format(e))
-                break
+            with file_lock:
+                with open('received_file.bin', 'wb') as file:
+                    bytes_received = 0
+                    while True:
+                        data = conn.recv(1024)
+                        if not data:
+                            break
+                        file.write(data)
+                        bytes_received += len(data)
 
-        # Print only the total received bytes (excluding the header) after each file transfer
-        print(received_bytes - HEADER_SIZE)
+                # Print only the total received bytes (excluding the header) after each file transfer.
+                print(bytes_received - HEADER_SIZE)
+
+                # Send a confirmation after receiving a file (you can customize this if needed).
+                conn.send(b'file-received\r\n')
 
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
