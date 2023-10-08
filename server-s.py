@@ -53,10 +53,10 @@ def handle_client(conn, addr):
 
         conn.send(b'accio\r\n')
 
-        expectedBytes = 1024
-        receivedBytes = 0
+        expected_bytes = 1024
+        received_bytes = 0
 
-        while receivedBytes < expectedBytes:
+        while received_bytes < expected_bytes:
             try:
                 # Set timeout to 10 seconds for receiving data.
                 conn.settimeout(10)
@@ -70,7 +70,7 @@ def handle_client(conn, addr):
                 # Simulate delay
                 time.sleep(DELAY_TIME)
                 # Update receivedBytes .
-                receivedBytes += len(data)
+                received_bytes += len(data)
             except socket.timeout:
                 sys.stderr.write("ERROR: Connection Timeout.\n")
                 break
@@ -78,7 +78,7 @@ def handle_client(conn, addr):
                 sys.stderr.write("ERROR: Transmission error: {}\n".format(e))
                 break
 
-        print(receivedBytes)
+        print(received_bytes)
 
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
