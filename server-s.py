@@ -34,6 +34,7 @@ def handle_client(conn, addr):
             with open(f'received_file_from_{addr[0]}_{addr[1]}.bin', 'wb') as file:
                 while True:
                     data = conn.recv(1024)
+                    file_lock.release()
                     if not data:
                         break
                     file.write(data)
