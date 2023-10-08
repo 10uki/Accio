@@ -7,13 +7,16 @@ socket.setdefaulttimeout(10)
 
 HOST = "0.0.0.0"  # Standard loopback interface address (localhost)
 
+
 # Function to handle signals (SIGINT, SIGQUIT, SIGTERM)
 def signal_handler(signum, frame):
     sys.exit(0)
 
+
 # Set signal handlers
 for sig in [signal.SIGINT, signal.SIGQUIT, signal.SIGTERM]:
     signal.signal(sig, signal_handler)
+
 
 def handle_client(conn, addr):
     try:
@@ -35,6 +38,7 @@ def handle_client(conn, addr):
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
 
+
 def establish_connection(PORT):
     try:
         # Create a socket object using IPv4 and TCP protocol
@@ -55,6 +59,7 @@ def establish_connection(PORT):
         sys.stderr.write(f"ERROR: {str(e)}\n")
         raise
 
+
 def main():
     if len(sys.argv) != 2:
         sys.stderr.write("ERROR: Usage - python3 server-s.py <PORT>\n")
@@ -72,20 +77,18 @@ def main():
         sys.stderr.write("ERROR: Invalid port number.\n")
         sys.exit(1)
 
-    try:
-        s = establish_connection(PORT)
+    s = establish_connection(PORT)
 
-        while True:
-            try:
-                conn, addr = s.accept()
-                # Start a new thread to handle the client
-                client_thread = threading.Thread(target=handle_client, args=(conn, addr))
-                client_thread.start()
-            except socket.timeout:
-                sys.stderr.write("ERROR: Connection Timeout.\n")
-                break  # Exit the loop on timeout
+    try:
+        conn, addr = s.accept()
+        # Start a new thread to handle the client
+        client_thread = threading.Thread(target=handle_client, args=(conn, addr))
+        client_thread.start()
+    except socket.timeout:
+        sys.stderr.write("ERROR: Connection Timeout.\n")
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
+
 
 if __name__ == "__main__":
     main()
