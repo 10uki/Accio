@@ -53,14 +53,18 @@ def handle_client(conn, addr):
 
         with file_lock:  # Acquire the lock before file operations
             with open('received_file.bin', 'wb') as file:
+                header_received = False
                 while True:
                     data = conn.recv(1024)
                     if not data:
                         break
                     file.write(data)
                     bytes_received += len(data)
+                    if not header_received:
+                        bytes_received -= HEADER_SIZE
+                        header_received = True
 
-        print(bytes_received - HEADER_SIZE)
+        print(bytes_received)
 
     except socket.timeout:
         sys.stderr.write("ERROR: Connection Timeout.\n")
