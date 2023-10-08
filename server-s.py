@@ -2,7 +2,6 @@ import socket
 import signal
 import sys
 import threading
-import time
 
 socket.setdefaulttimeout(10)
 
@@ -56,11 +55,17 @@ def handle_client(conn, addr):
                 with open('received_file.bin', 'wb') as file:
                     bytes_received = 0
                     while True:
-                        data = conn.recv(1024)
-                        if not data:
+                        try:
+                            # Set timeout to 10 seconds for receiving data.
+                            conn.settimeout(10)
+                            data = conn.recv(1024)
+                            if not data:
+                                break
+                            file.write(data)
+                            bytes_received += len(data)
+                        except socket.timeout:
+                            sys.stderr.write("ERROR: Connection Timeout while receiving data.\n")
                             break
-                        file.write(data)
-                        bytes_received += len(data)
 
                 # Print only the total received bytes (excluding the header) after each file transfer.
                 print(bytes_received - HEADER_SIZE)
