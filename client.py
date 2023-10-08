@@ -86,6 +86,7 @@ def client():
         print("File transfer successful")
     except TimeoutError:
         sys.stderr.write("ERROR: Server disconnected for more than 10 seconds.\n")
+        sys.exit(1)
 
     s.close()
     sys.exit(0)
