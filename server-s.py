@@ -43,19 +43,6 @@ def handle_client(conn, addr):
     finally:
         conn.close()
 
-def establish_connection(PORT):
-    try:
-        # Create a socket object using IPv4 and TCP protocol
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # Set timeout for socket operations
-        s.settimeout(10)
-        s.bind((HOST, PORT))
-        s.listen(10)
-        return s
-    except Exception as e:
-        sys.stderr.write(f"ERROR: {str(e)}\n")
-        raise
-
 def main():
     if len(sys.argv) != 2:
         sys.stderr.write("ERROR: Usage - python3 server-s.py <PORT>\n")
@@ -64,22 +51,32 @@ def main():
     PORT = sys.argv[1]
 
     try:
+        # A valid range for TCP port numbers (1-65535).
         PORT = int(PORT)
         if not 1 <= PORT <= 65535:
-            sys.stderr.write("ERROR: Invalid port number.\n")
-            sys.exit(1)
+            raise ValueError
     except ValueError:
         sys.stderr.write("ERROR: Invalid port number.\n")
         sys.exit(1)
 
     try:
-        s = establish_connection(PORT)
+        # Create a socket object using IPv4 and TCP protocol
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # Set timeout for socket operations
+        s.settimeout(10)
+        # Bind the socket to the provided host and port
+        s.bind((HOST, PORT))
+        # Listen for incoming connections with a backlog of 10
+        s.listen(10)
+
         while True:
-            conn, addr = s.accept()
-            client_thread = threading.Thread(target=handle_client, args=(conn, addr))
-            client_thread.start()
-    except socket.timeout:
-        sys.stderr.write("ERROR: Connection Timeout.\n")
+            try:
+                conn, addr = s.accept()
+                # Start a new thread to handle the client
+                client_thread = threading.Thread(target=handle_client, args=(conn, addr))
+                client_thread.start()
+            except socket.timeout:
+                sys.stderr.write("ERROR: Connection Timeout.\n")
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
 
