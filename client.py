@@ -7,7 +7,6 @@ MAX_CHUNKS = 10000
 
 def receive_command(s, command):
     received_data = b""
-    s.settimeout(10)
     try:
         while not received_data.endswith(command):
             chunk = s.recv(1)
