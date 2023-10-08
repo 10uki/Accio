@@ -19,7 +19,6 @@ def signal_handler(signum, frame):
 for sig in [signal.SIGINT, signal.SIGQUIT, signal.SIGTERM]:
     signal.signal(sig, signal_handler)
 
-
 def establish_connection(host, port):
     try:
         # Create a socket object using IPv4 and TCP protocol
@@ -32,10 +31,8 @@ def establish_connection(host, port):
             # Listen for incoming connections with a backlog of 10
             s.listen(10)
         except socket.error as e:
-            # Handle binding errors and exit with an error message
             sys.stderr.write(f"ERROR: Connection failed.\n")
             sys.exit(1)
-        # Return the established socket
         return s
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
@@ -54,15 +51,19 @@ def handle_client(conn, connection_number):
         file_path = os.path.join(file_dir, f"{connection_number}.file")
 
         with open(file_path, "wb") as file:
+            data = conn.recv(1024)
             while data:
                 file.write(data)
                 data = conn.recv(1024)
 
     except socket.timeout:
-        sys.stderr.write("ERROR: Connection Timeout.\n")
+        sys.stderr.write(f"ERROR: Connection Timeout.\n")
 
     except Exception as e:
-        sys.stderr.write(f"ERROR: {str(e)}\n")
+        sys.stderr.write(f"ERROR: {str(e)}.\n")
+
+    finally:
+        conn.close()
 
 def main():
     global file_dir
