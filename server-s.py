@@ -4,7 +4,6 @@ import sys
 import threading
 import random
 import time
-import atexit
 
 socket.setdefaulttimeout(10)
 
@@ -13,34 +12,27 @@ HOST = "0.0.0.0"
 ERROR_PROBABILITY = 0.1
 DELAY_TIME = 0.5
 
-# Create a global lock
+# Create a global lock.
 file_lock = threading.Lock()
 
-# Create a global variable to store the total received bytes
-total_received_bytes = 0
-
-# Function to handle signals (SIGINT, SIGQUIT, SIGTERM)
+# Function to handle signals (SIGINT, SIGQUIT, SIGTERM).
 def signal_handler(signum, frame):
     sys.exit(0)
 
-# Set signal handlers
-for sig in [
-    signal.SIGINT,
-    # signal.SIGQUIT,
-    # signal.SIGTERM
-    ]:
+# Set signal handlers.
+for sig in [signal.SIGINT, signal.SIGQUIT, signal.SIGTERM]:
     signal.signal(sig, signal_handler)
 
 def establish_connection(host, port):
     try:
-        # Create a socket object using IPv4 and TCP protocol
+        # Create a socket object using IPv4 and TCP protocol.
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # Set timeout for socket operations
         s.settimeout(10)
         try:
-            # Bind the socket to the provided host and port
+            # Bind the socket to the provided host and port.
             s.bind((host, port))
-            # Listen for incoming connections with a backlog of 10
+            # Listen for incoming connections with a backlog of 10.
             s.listen(10)
         except socket.error:
             sys.stderr.write(f"ERROR: Connection failed.\n")
@@ -51,8 +43,6 @@ def establish_connection(host, port):
         sys.exit(1)
 
 def handle_client(conn, addr):
-    global total_received_bytes  # Use the global variable
-
     try:
         conn.send(b'accio\r\n')
 
@@ -80,13 +70,15 @@ def handle_client(conn, addr):
                 time.sleep(DELAY_TIME)
                 # Update received bytes.
                 received_bytes += len(data)
-                total_received_bytes += len(data)  # Update the global total
             except socket.timeout:
                 sys.stderr.write("ERROR: Connection Timeout.\n")
                 break
             except socket.error as e:
                 sys.stderr.write("ERROR: Transmission error: {}\n".format(e))
                 break
+
+        # Print only the total received bytes (excluding the header) after each file transfer
+        print(received_bytes - len(b'accio\r\n') * 2)
 
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
@@ -124,6 +116,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# Print only the total received bytes (excluding the header) when the server exits
-atexit.register(lambda: print(total_received_bytes - len(b'accio\r\n') * 2))
