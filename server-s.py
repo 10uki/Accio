@@ -7,7 +7,7 @@ socket.setdefaulttimeout(10)
 
 # Constants
 HOST = "0.0.0.0"
-HEADER_SIZE= len(b'accio\r\n') * 2
+# HEADER_SIZE= len(b'accio\r\n') * 2
 
 # Create a global lock.
 file_lock = threading.Lock()
@@ -60,10 +60,9 @@ def handle_client(conn, addr):
                         break
                     file.write(data)
                     bytes_received = len(data)
-                    if not header_received:
-                        bytes_received -= HEADER_SIZE # Subtract the header size from within the loop.
-                        header_received = True
-
+                    # if not header_received:
+                    #     bytes_received -= HEADER_SIZE # Subtract the header size from within the loop.
+                    #     header_received = True
         print(bytes_received)
 
     except socket.timeout:
