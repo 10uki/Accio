@@ -2,6 +2,8 @@ import socket
 import signal
 import sys
 import threading
+import random
+import time
 
 socket.setdefaulttimeout(10)
 
@@ -17,6 +19,10 @@ def signal_handler(signum, frame):
 # Set signal handlers
 for sig in [signal.SIGINT, signal.SIGQUIT, signal.SIGTERM]:
     signal.signal(sig, signal_handler)
+
+# Define constants for error simulation
+ERROR_PROBABILITY = 0.1  # Adjust as needed
+DELAY_TIME = 1  # Adjust as needed
 
 def establish_connection(host, port):
     try:
@@ -47,26 +53,32 @@ def handle_client(conn, addr):
 
         conn.send(b'accio\r\n')
 
-        while True:  # Loop to handle multiple files within a single client connection
-            total_bytes_received = 0
+        expectedBytes = 1024
+        receivedBytes = 0
 
-            file_name = f'received_file_from_{addr[0]}_{addr[1]}_{total_bytes_received}.bin'
-            with file_lock:
-                with open(file_name, 'wb') as file:
-                    while True:
-                        data = conn.recv(1024)
-                        if not data:
-                            break
-                        file.write(data)
-                        total_bytes_received += len(data)
-
-            if total_bytes_received == 0:
+        while receivedBytes < expectedBytes:
+            try:
+                # Set timeout to 10 seconds for receiving data.
+                conn.settimeout(10)
+                # Receive .
+                data = conn.recv(1024)
+                if not data:
+                    break
+                # Simulate transmission error.
+                if random.random() < ERROR_PROBABILITY:
+                    continue
+                # Simulate delay
+                time.sleep(DELAY_TIME)
+                # Update receivedBytes .
+                receivedBytes += len(data)
+            except socket.timeout:
+                sys.stderr.write("ERROR: Connection Timeout.\n")
+                break
+            except socket.error as e:
+                sys.stderr.write("ERROR: Transmission error: {}\n".format(e))
                 break
 
-            print(total_bytes_received)
-
-    except socket.timeout:
-        sys.stderr.write("ERROR: Connection Timeout.\n")
+        print(receivedBytes)
 
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}\n")
