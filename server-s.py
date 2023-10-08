@@ -66,7 +66,8 @@ def main():
         # A valid range for TCP port numbers (1-65535).
         PORT = int(PORT)
         if not 1 <= PORT <= 65535:
-            raise ValueError
+            sys.stderr.write("ERROR: Invalid port number.\n")
+            sys.exit(1)
     except ValueError:
         sys.stderr.write("ERROR: Invalid port number.\n")
         sys.exit(1)
