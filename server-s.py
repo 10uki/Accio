@@ -22,6 +22,8 @@ def handle_client(conn, addr):
         total_bytes_received = 0
 
         confirmation = conn.recv(1024)
+        if confirmation != b'confirm-accio\r\n':
+            raise RuntimeError("Error: Invalid confirmation.")
 
         conn.send(b'accio\r\n')
 
