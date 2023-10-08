@@ -9,9 +9,6 @@ socket.setdefaulttimeout(10)
 HOST = "0.0.0.0"
 # HEADER_SIZE= len(b'accio\r\n') * 2
 
-# Create a global lock.
-file_lock = threading.Lock()
-
 # Function to handle signals (SIGINT, SIGQUIT, SIGTERM).
 def signal_handler(signum, frame):
     sys.exit(0)
@@ -55,7 +52,7 @@ def handle_client(conn, addr):
             chunk = conn.recv(1024)  # Receive data in 1024-byte chunks
             if not chunk:
                 break
-            bytes_received += len(chunk)  # Update the total bytes received
+            bytes_received = len(chunk)  # Update the total bytes received
 
         print(bytes_received)
 
