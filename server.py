@@ -9,6 +9,7 @@ socket.setdefaulttimeout(10)
 
 HOST = '0.0.0.0'
 file_dir = ""
+timeout_flag = False  # Add a flag to track timeouts
 
 # Function to handle signals (SIGINT, SIGQUIT, SIGTERM)
 def signal_handler(signum, frame):
@@ -69,7 +70,7 @@ def handle_client(conn, file_path):
         sys.stderr.write("ERROR: Connection Timeout.\n")
         # Write "ERROR" into the corresponding file and reset its content
         with open(file_path, "wb") as file:
-            file.write(b"ERROR")
+            file.write(b'"ERROR"')
 
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}.\n")

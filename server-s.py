@@ -59,7 +59,7 @@ def handle_client(conn, addr):
                     if not data:
                         break
                     file.write(data)
-                    bytes_received += len(data)
+                    bytes_received = len(data)
                     if not header_received:
                         bytes_received -= HEADER_SIZE # Subtract the header size from within the loop.
                         header_received = True
