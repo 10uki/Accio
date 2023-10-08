@@ -19,7 +19,11 @@ def handle_client(conn, addr):
     try:
         conn.send(b'accio\r\n')
 
-        total_bytes_received = 0  # Initialize the byte counter
+        total_bytes_received = 0
+
+        confirmation = conn.recv(1024)
+
+        conn.send(b'accio\r\n')
 
         with open(f'received_file_from_{addr[0]}_{addr[1]}.bin', 'wb') as file:
             while True:
