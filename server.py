@@ -3,6 +3,7 @@ import sys
 import threading
 import signal
 import os
+import time
 
 socket.setdefaulttimeout(10)
 
@@ -38,7 +39,7 @@ def establish_connection(host, port):
         sys.stderr.write(f"ERROR: {str(e)}\n")
         sys.exit(1)
 
-def handle_client(conn, connection_number):
+def handle_client(conn, connection_number, file_path):
     try:
         conn.send(b'accio\r\n')
 
@@ -48,16 +49,21 @@ def handle_client(conn, connection_number):
 
         conn.send(b'accio\r\n')
 
-        file_path = os.path.join(file_dir, f"{connection_number}.file")
-
         with open(file_path, "wb") as file:
             data = conn.recv(1024)
+            data_time = time.time()  # Track the time of the last received data
             while data:
                 file.write(data)
+                data_time = time.time()  # Update the last data time
                 data = conn.recv(1024)
+                if time.time() - data_time > 10:
+                    raise socket.timeout("Connection Timeout")
 
     except socket.timeout:
-        sys.stderr.write(f"ERROR: Connection Timeout.\n")
+        sys.stderr.write(f"ERROR: Connection Timeout for connection {connection_number}.\n")
+        # Write "ERROR" into the corresponding file and reset its content
+        with open(file_path, "wb") as file:
+            file.write(b"ERROR")
 
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}.\n")
@@ -92,7 +98,8 @@ def main():
             try:
                 conn, addr = s.accept()
                 connection_number += 1
-                client_thread = threading.Thread(target=handle_client, args=(conn, connection_number))
+                file_path = os.path.join(file_dir, f"{connection_number}.file")
+                client_thread = threading.Thread(target=handle_client, args=(conn, connection_number, file_path))
                 client_thread.start()
             except socket.timeout:
                 sys.stderr.write("ERROR: Connection Timeout.\n")
