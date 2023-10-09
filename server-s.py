@@ -7,7 +7,6 @@ socket.setdefaulttimeout(10)
 
 # Constants
 HOST = "0.0.0.0"
-# HEADER_SIZE= len(b'accio\r\n') * 2
 
 # Function to handle signals (SIGINT, SIGQUIT, SIGTERM).
 def signal_handler(signum, frame):
