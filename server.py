@@ -3,6 +3,7 @@ import sys
 import threading
 import signal
 import os
+import time
 
 socket.setdefaulttimeout(10)
 
@@ -10,7 +11,6 @@ HOST = '0.0.0.0'
 
 # Function to handle signals (SIGINT, SIGQUIT, SIGTERM)
 def signal_handler(signum, frame):
-    sys.stderr.write("Received signal. Exiting gracefully...\n")
     sys.exit(0)
 
 # Set signal handlers.
@@ -38,6 +38,9 @@ def establish_connection(host, port):
 
 def handle_client(conn, file_dir, file_number):
     try:
+        # Set the initial data time.
+        data_time = time.time()
+
         # Send the first accio command to the client.
         conn.send(b'accio\r\n')
 
@@ -51,19 +54,26 @@ def handle_client(conn, file_dir, file_number):
 
         # Receive and save the binary data sent by the client.
         data = b""
+        data_time = time.time()
         while True:
             chunk = conn.recv(1024)
             if not chunk:
                 break
             data += chunk
 
-    except socket.timeout:
-        data = b"ERROR"
+            # Reset the timeout timer whenever data is received.
+            data_time = time.time()
 
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}.\n")
+        data = b"ERROR"
 
-    # Save the data to a file with a sequential name using the global lock.
+        # Check if no data received for more than 10 seconds
+    if time.time() - data_time > 10:
+        sys.stderr.write("ERROR: Connection Timeout.\n")
+        data = b"ERROR"
+
+        # Save the data to a file with a sequential name using the global lock.
     file_path = os.path.join(file_dir, f"{file_number}.file")
     with open(file_path, 'wb') as f:
         f.write(data)
@@ -87,23 +97,17 @@ def main():
 
     with establish_connection(HOST, PORT) as s:
         file_number = 1
-        client_threads = []  # Store client threads
         while True:
             try:
                 conn, addr = s.accept()
                 # Start a new thread to handle the client.
                 client_thread = threading.Thread(target=handle_client, args=(conn, file_dir, file_number))
                 client_thread.start()
-                client_threads.append(client_thread)
                 file_number += 1
             except socket.timeout:
                 sys.stderr.write("ERROR: Connection Timeout.\n")
             except Exception as e:
                 sys.stderr.write(f"ERROR: {str(e)}\n")
-
-            # Wait for all client threads to finish before exiting.
-            for thread in client_threads:
-                thread.join()
 
 if __name__ == "__main__":
     main()
