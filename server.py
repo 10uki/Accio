@@ -3,7 +3,6 @@ import sys
 import threading
 import signal
 import os
-import time
 
 socket.setdefaulttimeout(10)
 
@@ -39,8 +38,7 @@ def establish_connection(host, port):
 
 def handle_client(conn, file_dir, file_number):
     try:
-
-        # Send first accio command to the client.
+        # Send the first accio command to the client.
         conn.send(b'accio\r\n')
 
         # Receive confirmation from the client.
@@ -48,7 +46,7 @@ def handle_client(conn, file_dir, file_number):
         if confirmation != b'confirm-accio\r\n':
             raise RuntimeError("Error: Invalid confirmation.")
 
-        # Send second accio command to the client.
+        # Send the second accio command to the client.
         conn.send(b'accio\r\n')
 
         # Receive and save the binary data sent by the client.
@@ -65,13 +63,12 @@ def handle_client(conn, file_dir, file_number):
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}.\n")
 
-    finally:
-        conn.close()
-
     # Save the data to a file with a sequential name using the global lock.
     file_path = os.path.join(file_dir, f"{file_number}.file")
-        with open(file_path, 'wb') as f:
-            f.write(data)
+    with open(file_path, 'wb') as f:
+        f.write(data)
+
+    conn.close()
 
 def main():
     if len(sys.argv) != 3:
