@@ -12,16 +12,14 @@ HOST = '0.0.0.0'
 # Create a global lock.
 file_lock = threading.Lock()
 
-
 # Function to handle signals (SIGINT, SIGQUIT, SIGTERM)
 def signal_handler(signum, frame):
+    sys.stderr.write("Received signal. Exiting gracefully...\n")
     sys.exit(0)
 
-
-# Set signal handlers
+# Set signal handlers.
 for sig in [signal.SIGINT, signal.SIGQUIT, signal.SIGTERM]:
     signal.signal(sig, signal_handler)
-
 
 def establish_connection(host, port):
     try:
@@ -42,10 +40,9 @@ def establish_connection(host, port):
         sys.stderr.write(f"ERROR: {str(e)}\n")
         sys.exit(1)
 
-
 def handle_client(conn, file_dir, file_number):
     try:
-        # Set the initial data .
+        # Set the initial data time.
         data_time = time.time()
 
         # Send first accio command to the client.
@@ -67,32 +64,23 @@ def handle_client(conn, file_dir, file_number):
                 break
             data += chunk
 
-    except socket.timeout:
-        data = b"ERROR"
-
-        # Update the last data time
-        data_time = time.time()
-
-        # Check if no data received for more than 10 seconds
-        if time.time() - data_time > 10:
-            sys.stderr.write("ERROR: Connection Timeout.\n")
-            # Write "ERROR" into the corresponding file and reset its content
-            file_path = os.path.join(file_dir, f"{file_number}.file")
-            with open(file_path, 'wb') as f:
-                f.write(b"ERROR")
-            return
-
-        # Save the data to a file with a sequential name.
-        file_path = os.path.join(file_dir, f"{file_number}.file")
-        with open(file_path, 'wb') as f:
-            f.write(data)
-
     except Exception as e:
         sys.stderr.write(f"ERROR: {str(e)}.\n")
+        data = b"ERROR"
 
     finally:
         conn.close()
 
+    # Check if no data received for more than 10 seconds
+    if time.time() - data_time > 10:
+        sys.stderr.write("ERROR: Connection Timeout.\n")
+        data = b"ERROR"
+
+    # Save the data to a file with a sequential name using the global lock.
+    file_path = os.path.join(file_dir, f"{file_number}.file")
+    with file_lock:
+        with open(file_path, 'wb') as f:
+            f.write(data)
 
 def main():
     if len(sys.argv) != 3:
@@ -122,7 +110,6 @@ def main():
                 sys.stderr.write("ERROR: Connection Timeout.\n")
             except Exception as e:
                 sys.stderr.write(f"ERROR: {str(e)}\n")
-
 
 if __name__ == "__main__":
     main()
