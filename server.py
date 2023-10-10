@@ -95,7 +95,7 @@ def handle_client(conn, file_dir, file_number):
     file_path = os.path.join(file_dir, f"{file_number}.file")
     with open(file_path, 'wb') as f:
         f.write(data)
-
+    # Finally, close connection.
     conn.close()
 
 
