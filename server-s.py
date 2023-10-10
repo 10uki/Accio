@@ -21,7 +21,7 @@ def establish_connection(PORT):
     try:
         # Create a socket object using IPv4 and TCP protocol.
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # Set timeout for socket operations
+        # Set timeout for socket operations.
         s.settimeout(10)
         try:
             # Bind the socket to the provided host and port.
