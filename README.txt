@@ -1,4 +1,4 @@
-A simple client-server application that transfers a file over a TCP connection. This project is split into 3 parts:
+[Python] A simple client-server application that transfers a file over a TCP connection. This project is split into 3 parts:
 1. Client
 Accio client is a relatively simple application that connects to a server and sends a binary file utilizing accio\r\n sequence.
 2. Simple Server
